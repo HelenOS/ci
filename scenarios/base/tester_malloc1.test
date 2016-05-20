@@ -1,0 +1,7 @@
+#!/bin/sh
+
+xx_start_machine
+
+xx_cmd "tester malloc1" assert="Test passed" timeout=120 die_on="demo"
+
+xx_stop_machine

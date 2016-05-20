@@ -1,0 +1,5 @@
+#!/bin/sh
+
+# @needs zlib
+
+exit 0

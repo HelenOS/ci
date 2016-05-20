@@ -1,0 +1,174 @@
+/*
+ * Copyright (c) 2016 Vojtech Horky
+ * All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions
+ * are met:
+ *
+ * - Redistributions of source code must retain the above copyright
+ *   notice, this list of conditions and the following disclaimer.
+ * - Redistributions in binary form must reproduce the above copyright
+ *   notice, this list of conditions and the following disclaimer in the
+ *   documentation and/or other materials provided with the distribution.
+ * - The name of the author may not be used to endorse or promote products
+ *   derived from this software without specific prior written permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE AUTHOR ``AS IS'' AND ANY EXPRESS OR
+ * IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
+ * OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED.
+ * IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY DIRECT, INDIRECT,
+ * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT
+ * NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+ * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+ * THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
+ * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ *
+ */
+
+BODY {
+    font-family: Verdana,Arial,sans-serif;
+}
+H1 {
+    text-align: center;
+    font-size: 200%;
+}
+H2, H3 {
+    clear: both;
+    font-size: 150%;
+    text-align: center;
+    padding: 1em 0 0 0;
+}
+H3 {
+    padding: 0;
+    font-size: 120%;
+}
+A:link, A:visited, A:hover, A:active {
+    padding: 3px;
+}
+A:link, A:visited {
+    color: #036;
+}
+A:hover {
+    background: #036;
+    color: white;
+}
+.back-to-top A:link, .back-to-top A:visited {
+    text-decoration: none;
+    font-size: 80%;
+    margin-left: 1em;
+}
+DIV#centered {
+    border: 0;
+    width: 90%;
+    position: absolute;
+    left: 5%;
+    top: 0%;
+    padding: 1em 0 2em 0;
+}
+TABLE {
+    margin: auto;
+    width: 80%;
+    border: 2px solid black;
+    border-width: 2px 0 2px;
+    border-collapse: collapse;
+    padding: 0;
+    text-align: left;
+    line-height: 130%;
+    vertical-align: middle;
+    table-layout: fixed; 
+}
+TABLE THEAD TH {
+    border-bottom: 1px solid black;
+}
+TABLE TD {
+    border-bottom: 1px solid #999;
+}
+TABLE TD, TABLE TH {
+    padding: 5px 4px;
+}
+TABLE TR.result-ok TD {
+    background: #cfc;
+}
+TABLE TR.result-fail TD {
+    background: #fcc;
+}
+TABLE TR.result-skip TD {
+    background: #ccc;
+}
+TABLE TR.aborted TD {
+    background: #fc0;
+}
+TR.logdump {
+    max-width: 80%;
+}
+TR.logdump TD PRE {
+    max-width: 100%;
+    overflow: auto;
+}
+#summary H2 {
+    display: none;
+}
+TABLE.summary TD {
+    background: #fcc;
+}
+TABLE.summary TR.results-100 TD {
+    background: #cfc;
+}
+TABLE.summary TR.results-90 TD,
+TABLE.summary TR.results-80 TD,
+TABLE.summary TR.results-70 TD,
+TABLE.summary TR.results-60 TD {
+    background: #ffe;
+}
+TABLE.summary TR.results-none TD {
+    background: #ccc;
+}
+#quick-links {
+    line-height: 3em;
+    padding: 2em 0;
+}
+#quick-links .quick-link-group {
+    clear: both;
+    padding: 0 0 0 0;
+}
+#quick-links H2 {
+    display: none;
+}
+#quick-links H3 {
+    margin: 0;
+    padding: 0 2em 0 0;
+    font-size: 100%;
+    float: left;
+}
+#quick-links UL {
+    padding: 0;
+    margin: 0;
+}
+#quick-links UL LI, #quick-links UL LI {
+    list-style-type: none;
+    float: left;
+    margin: 0;
+    padding: 0 1ex;
+}
+P.action {
+    text-align: center;
+}
+UL.previous-builds {
+    list-style-type: none;
+    line-height: 3em;
+    padding-bottom: 3em;
+}
+UL.previous-builds LI {
+    float: left;
+}
+.buttonset A:link, .buttonset A:visited {
+    padding: 0.8ex;
+    border: 2px solid transparent;
+    border-radius: 1ex;
+}
+.buttonset A:hover {
+    border: 2px solid #036;
+    border-radius: 1ex;
+}

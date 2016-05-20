@@ -1,0 +1,49 @@
+HelenOS Continuous Integration Testing Scripts
+==============================================
+
+The purpose of this repository is to have a universal script for building
+and testing (almost) everything related to HelenOS. Currently, the script
+is able to:
+ - fetch latest versions of HelenOS and Coastline
+ - build HelenOS for all supported architectures
+ - build all harbours (the full matrix)
+ - run automated tests in QEMU (ia32/amd64 only)
+
+
+Running
+-------
+
+This is configuration for Jenkins that seems to work well :-)
+
+    # Run the build, max 3 parallel tasks, keep old results in attic/, get
+    # build number from Jenkins, use custom build directory and do not run
+    # the tests with KVM.
+    ./build-all.sh -j 3 -a attic -i $BUILD_NUMBER \
+        -d /var/tmp/helenos-ci-jenkins/ --no-kvm
+    
+    # Rotate the results, keep max 20 historical.
+    xsltproc --stringparam SIZE 20 log-rotate.xsl attic/log.xml >attic/log2.xml
+    mv attic/log2.xml attic/log.xml
+    
+    # Recreate the web pages under html/
+    rm -rf html
+    ./make-web.sh attic/log.xml html
+
+
+Tests
+-----
+
+See scripts in scenarios/ or the test-in-vm.sh script.
+
+Simple test running malloc and checking its output looks like this:
+
+    xx_start_machine
+    xx_cmd "tester malloc1" assert="Test passed" timeout=120 die_on="demo"
+    xx_stop_machine
+
+Test checking that we are able to launch gcc (needs special image):
+
+    # @needs gcc
+    xx_start_machine
+    xx_cmd "gcc" assert="no input files" timeout=20
+    xx_stop_machine

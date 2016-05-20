@@ -1,0 +1,9 @@
+#!/bin/sh
+
+# @needs gcc
+
+xx_start_machine
+
+xx_cmd "gcc" assert="no input files" timeout=20
+
+xx_stop_machine

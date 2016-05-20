@@ -1,0 +1,9 @@
+#!/bin/sh
+
+# @needs zlib
+
+xx_start_machine
+
+xx_cmd "minigzip --help" assert="ENOENT" timeout=20
+
+xx_stop_machine

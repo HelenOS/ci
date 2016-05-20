@@ -1,0 +1,68 @@
+
+xx_start_machine name=main
+
+
+# Create empty file /tmp/img with reasonable size.
+# We give it 3s for prompt to reappear and no error message to
+# be printed (cmd checks for standard Bdsh error message by default).
+xx_cmd "mkfile --size 2m /tmp/img" timeout=10
+
+# Check that the created image is of right size.
+# We issue a more descriptive error message if not. We leave the timeout
+# here on default since ls ought to be pretty fast.
+xx_cmd "ls /tmp" \
+    assert="2097152" \
+    error="Empty image file does not have the right size."
+
+# Just for demonstration, we check the file size again, here with zero
+# timeout as the text is already on the screen anyway.
+xx_assert "2097152" message="Ooops" timeout=0
+
+# Create block device on the file.
+xx_cmd "file_bd /tmp/img fbd0" \
+    assert="Accepting connections" \
+    error="Failed to start block device layer." \
+    timeout=20
+
+# Create filesystem there. We print a customized message when doing so.
+xx_cmd \
+    "mkfat --type 12 fbd0" \
+    assert="Success" \
+    message="Creating FAT on the file-backed block device" \
+    error="Failed to create FAT file system" \
+    timeout=25
+
+
+# Start the FAT file server
+xx_cmd "fat" \
+    assert="Accepting connections" \
+    error="Failed to start FAT service." \
+    timeout=20
+
+# Mount the filesystem.
+# Error in this command results in the word 'Unable' to appear on the screen.
+xx_cmd "mount fat /data fbd0" die_on="Unable"
+xx_die_on "Unable"
+
+# Copy the file to the mounted filesystem.
+xx_cmd "cp demo.txt /data" error="Copying demo.txt failed"
+
+# Check that the file is copied there.
+# We need to clear the screen as the word demo.txt was used in the previous
+# command.
+xx_cls
+xx_cmd "ls /data" assert="demo.txt"
+
+
+# Remount the image and check the file is still there (cls is needed again).
+xx_cmd "umount /data"
+xx_sleep 3
+xx_cmd "mount fat /data fbd0" die_on="Unable"
+xx_cls
+xx_cmd "ls /data" assert="demo.txt" error="demo.txt disappeared from the FAT image."
+
+
+# Not necessary, really.
+xx_cmd "umount /data"
+
+xx_stop_machine
