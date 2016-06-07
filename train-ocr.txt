@@ -1,0 +1,7 @@
+This is training file for pseudo-OCR in test-in-vm.sh script.
+Copy it to uspace/overlay before running
+
+  ./test-in-vm.sh --train-ocr
+
+Do not modify the text below this line!
+0101010101010101010101 1234567890!@#$%^&*()-_+=.<,>/?\|;:~[]{}"'`abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ

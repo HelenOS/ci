@@ -326,103 +326,15 @@ xx_cls() {
     sleep 1
 }
 
+xx_do_ocr_prepare() {
+    convert "$1" -crop "8x16" +repage +adjoin txt:- \
+        | sed -e 's|[0-9]*,[0-9]*: ([^)]*)[ ]*#\([0-9A-Fa-f]\{6\}\).*|\1|' -e 's:^#.*:@:' -e 's#000000#0#g' -e 's#FFFFFF#F#' \
+        | sed -e ':a' -e 'N;s#\n##;s#^@##;/@$/{s#@$##p;d}' -e 't a'
+}
+    
+
 xx_do_ocr() {
-    convert "$1" -crop "8x16" +repage +adjoin -format "%#" -write info:- null: \
-        | fold -w 64 \
-        | cut -c 1-4 \
-        | sed \
-        -e "s:fe6c:a:g" \
-        -e "s:3565:b:g" \
-        -e "s:e670:c:g" \
-        -e "s:858f:d:g" \
-        -e "s:71e0:e:g" \
-        -e "s:18c4:f:g" \
-        -e "s:1ea6:g:g" \
-        -e "s:2df4:h:g" \
-        -e "s:1434:i:g" \
-        -e "s:1c2b:j:g" \
-        -e "s:5041:k:g" \
-        -e "s:5f89:l:g" \
-        -e "s:ddfb:m:g" \
-        -e "s:d1a3:n:g" \
-        -e "s:b396:o:g" \
-        -e "s:7f04:p:g" \
-        -e "s:091a:q:g" \
-        -e "s:ec55:r:g" \
-        -e "s:0547:s:g" \
-        -e "s:085b:t:g" \
-        -e "s:e86d:u:g" \
-        -e "s:b632:v:g" \
-        -e "s:1057:w:g" \
-        -e "s:0a86:x:g" \
-        -e "s:a7f9:y:g" \
-        -e "s:f1c4:z:g" \
-        -e "s:c402:A:g" \
-        -e "s:32dc:B:g" \
-        -e "s:4fa4:C:g" \
-        -e "s:7e23:D:g" \
-        -e "s:6289:E:g" \
-        -e "s:6b69:F:g" \
-        -e "s:62f2:G:g" \
-        -e "s:f0df:H:g" \
-        -e "s:93ed:I:g" \
-        -e "s:076f:J:g" \
-        -e "s:d58f:K:g" \
-        -e "s:4665:L:g" \
-        -e "s:a1e2:M:g" \
-        -e "s:a7f3:N:g" \
-        -e "s:80cd:O:g" \
-        -e "s:6810:P:g" \
-        -e "s:f1d7:Q:g" \
-        -e "s:ba8e:R:g" \
-        -e "s:b102:S:g" \
-        -e "s:6718:T:g" \
-        -e "s:4a03:U:g" \
-        -e "s:4762:V:g" \
-        -e "s:53a7:W:g" \
-        -e "s:bcf4:X:g" \
-        -e "s:fa75:Y:g" \
-        -e "s:a4d8:Z:g" \
-        -e "s:b10a:0:g" \
-        -e "s:16dd:1:g" \
-        -e "s:c5b0:2:g" \
-        -e "s:1dc0:3:g" \
-        -e "s:9f6b:4:g" \
-        -e "s:306e:5:g" \
-        -e "s:08b8:6:g" \
-        -e "s:f173:7:g" \
-        -e "s:4926:8:g" \
-        -e "s:3db4:9:g" \
-        -e "s:be18:/:g" \
-        -e "s:51f5:\\\\:g" \
-        -e "s:b187:#:g" \
-        -e "s:c29c:|:g" \
-        -e "s:467f:_:g" \
-        -e "s:013e:-:g" \
-        -e "s:4f24:.:g" \
-        -e "s:659f:,:g" \
-        -e "s:3a40:(:g" \
-        -e "s:913d:?:g" \
-        -e "s:7c6c:!:g" \
-        -e "s:55af:):g" \
-        -e "s:100d:[:g" \
-        -e "s:fa0c:]:g" \
-        -e "s:db86:{:g" \
-        -e "s:8935:}:g" \
-        -e "s:22bd:\&:g" \
-        -e "s:7ff2:*:g" \
-        -e "s:f5b0:\$:g" \
-        -e "s:bd43:\':g" \
-        -e "s:3810:\":g" \
-        -e "s:5bd7:%:g" \
-        -e "s:810e:@:g" \
-        -e "s:3050:<:g" \
-        -e "s:9d79:>:g" \
-        -e "s#ded3#:#g" \
-        -e "s:4708:;:g" \
-        -e "s:a292: :g" \
-        -e "s:a1a4:_:g" \
-        -e "s:....:?:g"
+    xx_do_ocr_prepare "$1" | sed -f ocr.sed
 }
 
 xx_do_screenshot() {
@@ -548,6 +460,7 @@ EOF_USAGE
 
 XX_DEBUG_ECHO=:
 XX_ACTIVITY_ECHO=:
+XX_TRAIN_OCR=false
 XX_HEADLESS=false
 XX_USE_KVM=true
 XX_TEMP="$PWD/tmp-vm/"
@@ -567,6 +480,13 @@ while [ $# -gt 0 ]; do
     case "$1" in
         --headless)
             XX_HEADLESS=true
+            ;;
+        --train-ocr)
+            XX_TRAIN_OCR=true
+            ;;
+        --train-ocr=*)
+            XX_TRAIN_OCR=true
+            XX_TRAIN_OCR_FILE=`echo "$1" | cut '-d=' -f 2-`
             ;;
         --debug)
             XX_DEBUG_ECHO=echo
@@ -619,6 +539,76 @@ if $XX_AUTODETECT_HELENOS; then
     XX_CDROM_FILE=$XX_HELENOS_ROOT/`cat "$XX_HELENOS_ROOT/defaults/$XX_ARCH/output"`
 fi
 
+
+if $XX_TRAIN_OCR; then
+    if [ -z "$XX_TRAIN_OCR_FILE" ]; then
+        echo "Usage notes for --train-ocr command-line switch."
+        echo
+        echo "Prepare HelenOS image.iso with train-ocr.txt in its root."
+        echo
+        echo "Run this script with the ISO and with --train-ocr=out.sed"
+        echo "where out.sed is output file with OCR commands."
+        echo
+        echo "If the script finishes with  no error you can replace the"
+        echo "old OCR scheme (ocr.sed) with the new one in out.sed."
+        echo
+        exit
+    fi
+    
+    # Set to false to debug the script below without running QEMU
+    # all the time
+    if true; then
+	    xx_start_machine name=ocr vterm=false
+	    xx_echo "Will display the training set on the VM screen"
+	    xx_echo "(this will take a while)."
+	    sleep 20
+	    xx_do_type ocr "cat train-ocr.txt"
+	    sleep 1
+	    xx_do_qemu_command ocr "sendkey ret"
+	    sleep 5
+	    xx_do_screenshot ocr "$XX_TEMP/ocr-full.ppm" "$XX_TEMP/ocr-term.png"
+	    xx_stop_machine
+    fi
+    
+    xx_echo "Doing OCR..."
+    xx_do_ocr_prepare "$XX_TEMP/ocr-term.png" \
+        | (
+        prev1_line=""
+        prev2_line=""
+        prev3_line=""
+        counter=0
+        while read current_line; do
+            if [ $counter -gt 5 ]; then
+                while read current_line; do
+                    if ! [ "$current_line" = "$prev1_line" -o "$current_line" = "$prev2_line" ]; then
+                        break
+                    fi
+                done
+                alphabet=`sed -n 's#^\(.\)\(.\)\(\1\2\)\{4,\}##p' train-ocr.txt`
+                alphabet_size=`echo "$alphabet" | wc -c`
+                for i in `seq 1 $(( $alphabet_size - 1))`; do
+                    symbol="`echo \"$alphabet\" | fold -w 1 | sed -n \"${i}p\" | sed 's#[*\.\&\\:\/\[]\|\]#\\\\&#g'`"
+                    echo "s:$current_line:$symbol:" 
+                    read current_line
+                done
+                echo "$current_line" | tr 'F' '0' | sed 's#.*#s:&:_:#'
+                echo "$current_line" | tr '0F' '.' | sed 's#.*#s:&:?:#'
+                break
+            fi
+            if [ "$current_line" = "$prev2_line" -a "$prev1_line" = "$prev3_line" -a "$prev1_line" != "$prev2_line" ]; then
+                counter=$(( $counter + 1 ))
+            else
+                counter=0
+            fi
+            prev3_line="$prev2_line"
+            prev2_line="$prev1_line"
+            prev1_line="$current_line"
+        done >"$XX_TRAIN_OCR_FILE"
+        )
+    xx_echo "New OCR scheme is in $XX_TRAIN_OCR_FILE."
+    exit
+fi
+    
 
 XX_RESULT_SUMMARY="$XX_TEMP/summary.$$.txt"
 
