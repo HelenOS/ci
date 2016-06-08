@@ -136,7 +136,7 @@ task_count_running() {
 task_wait_for() {
     for __TASK_DEP in "$@"; do
         while ! [ -f "$__TASK_DIR/$__TASK_DEP.done" ]; do
-            sleep $TASK_SLEEP
+            sleep $(( $TASK_SLEEP + ( $RANDOM % 5 ) )) 
         done
     done
 }
@@ -158,7 +158,7 @@ task_start() {
     while ! mkdir "$__TASK_DIR/$__TASK_NUMBER.run" 2>/dev/null; do
         __TASK_NUMBER=$(( $__TASK_NUMBER + 1 ))
         if [ $__TASK_NUMBER -gt $MAX_TASKS ]; then
-            sleep $TASK_SLEEP
+            sleep $(( $TASK_SLEEP + ( $RANDOM % 5 ) ))
             __TASK_NUMBER=1
         fi
     done
@@ -345,6 +345,8 @@ if [ -n "$CONFIG_FILE" ]; then
     SCENARIOS=`get_config "$CONFIG_FILE" scenarios "$SCENARIOS"`
     
     MAX_TASKS=`get_config "$CONFIG_FILE" tasks ""`
+    
+    TASK_SLEEP=`get_config "$CONFIG_FILE" task_sleep "$TASK_SLEEP"`
 fi
 
 
@@ -403,6 +405,9 @@ if [ -z "$MAX_TASKS" ]; then
     [ -z "$MAX_TASKS" ] && MAX_TASKS=1
 fi
 
+if [ $TASK_SLEEP -lt 1 ]; then
+    TASK_SLEEP=1
+fi
 
 
 
