@@ -1,7 +1,7 @@
-#!/bin/sh
+#!/usr/bin/env python3
 
 #
-# Copyright (c) 2016 Vojtech Horky
+# Copyright (c) 2017 Vojtech Horky
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -28,43 +28,43 @@
 # THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #
 
-SCRIPT_HOME=`which -- "$0" 2>/dev/null`
-# Maybe, we are running Bash
-[ -z "$SCRIPT_HOME" ] && SCRIPT_HOME=`which -- "$BASH_SOURCE" 2>/dev/null`
-SCRIPT_HOME=`dirname -- "$SCRIPT_HOME"`
+from hbuild.scheduler import Task
 
-run_echo() {
-	echo -n "[make-web]: "
-	for ___i in "$@"; do
-		echo -n "$___i" | sed -e 's#"#\\"#g' -e 's#.*#"&" #'
-	done
-	echo
-	"$@"
-}
+class CvsCheckoutTask(Task):
+    def __init__(self, **attrs):
+        Task.__init__(self, 'checkout', **attrs)
 
-INPUT_XML="$1"
-TARGET_DIR="$2"
+    def do_checkout(self, target_directory):
+        raise Exception('CvsCheckoutTask.do_checkout() cannot be called directly.')
 
-if ! [ -r "$INPUT_XML" ]; then
-    echo "Cannot read input XML from '$INPUT_XML'."
-    exit 1
-fi
+    def run(self):
+        dname = '%s/%s' % (self.ctl.make_temp_dir('repo'), self.name)
 
-if [ -z "$TARGET_DIR" ]; then
-    echo "Specify output directory as second argument."
-    exit 2
-fi
+        self.do_checkout(dname)
 
-run_echo mkdir -p "$TARGET_DIR"
-if ! [ -d "$TARGET_DIR" ]; then
-    echo "Cannot create directory $TARGET_DIR."
-    exit 3
-fi
+        return {
+            'dir': dname
+        }
 
-run_echo cp "$SCRIPT_HOME/web/main.css" "$TARGET_DIR"
-run_echo cp "$SCRIPT_HOME/web/jquery-2.1.4.min.js" "$TARGET_DIR"
+class BzrCheckoutTask(CvsCheckoutTask):
+    def __init__(self, name, url):
+        self.name = name
+        self.url = url
+        CvsCheckoutTask.__init__(self, repository=url)
 
-run_echo xsltproc \
-    --stringparam OUTPUT_DIRECTORY "$TARGET_DIR" \
-    "$SCRIPT_HOME/web/web.xsl" \
-    "$INPUT_XML"
+    def do_checkout(self, target_directory):
+        res = self.ctl.run_command(['bzr', 'branch', self.url, target_directory ])
+        if res['failed']:
+            raise Exception('Bazaar checkout of %s failed.' % self.url)
+
+class RsyncCheckoutTask(CvsCheckoutTask):
+    def __init__(self, name, base):
+        self.name = name
+        self.base = base
+        CvsCheckoutTask.__init__(self, repository=base)
+
+    def do_checkout(self, target_directory):
+        res = self.ctl.run_command(['rsync', '-a', self.base + '/', target_directory ])
+        if res['failed']:
+            raise Exception('Rsync of %s failed.' % self.base)
+

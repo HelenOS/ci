@@ -40,6 +40,9 @@ H2, H3 {
     text-align: center;
     padding: 1em 0 0 0;
 }
+H2#build-info {
+    padding-top: 0;
+}
 H3 {
     padding: 0;
     font-size: 120%;
@@ -82,7 +85,7 @@ TABLE {
 TABLE THEAD TH {
     border-bottom: 1px solid black;
 }
-TABLE TD {
+TABLE TD, TABLE TBODY TH {
     border-bottom: 1px solid #999;
 }
 TABLE TD, TABLE TH {
@@ -124,6 +127,10 @@ TABLE.summary TR.results-60 TD {
 }
 TABLE.summary TR.results-none TD {
     background: #ccc;
+}
+TABLE.matrix {
+    width: 100%;
+    text-align: center;
 }
 #quick-links {
     line-height: 3em;
