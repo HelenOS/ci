@@ -184,7 +184,7 @@ xx_do_check_var() {
 }
 
 xx_do_compute_timeout() {
-    echo $(( `date +%s` + $1 ))
+    echo $(( `date +%s` + 10 * $1 ))
 }
 
 # 
@@ -223,6 +223,7 @@ xx_start_machine() {
         -redir tcp:8080::8080 -redir tcp:8081::8081 \
         -redir tcp:2223::2223 \
         -usb \
+        -m 256 \
         -daemonize -pidfile "$XX_TEMP/$name.pid" \
         -monitor "unix:$XX_TEMP/$name.monitor,server,nowait" \
         -boot d \
@@ -334,7 +335,7 @@ xx_do_ocr_prepare() {
     
 
 xx_do_ocr() {
-    xx_do_ocr_prepare "$1" | sed -f ocr.sed
+    xx_do_ocr_prepare "$1" | sed -f "$XX_MY_HOME/ocr.sed"
 }
 
 xx_do_screenshot() {
@@ -457,6 +458,11 @@ where [options] are:
 EOF_USAGE
 }
 
+
+XX_MY_HOME=`which -- "$0" 2>/dev/null`
+# Maybe, we are running Bash
+[ -z "$XX_MY_HOME" ] && XX_MY_HOME=`which -- "$BASH_SOURCE" 2>/dev/null`
+XX_MY_HOME=`dirname -- "$XX_MY_HOME"`
 
 XX_DEBUG_ECHO=:
 XX_ACTIVITY_ECHO=:
