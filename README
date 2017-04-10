@@ -13,21 +13,14 @@ is able to:
 Running
 -------
 
-This is configuration for Jenkins that seems to work well :-)
-
-    # Run the build, max 3 parallel tasks, keep old results in attic/, get
-    # build number from Jenkins, use custom build directory and do not run
-    # the tests with KVM.
-    ./build-all.sh -j 3 -a attic -i $BUILD_NUMBER \
-        -d /var/tmp/helenos-ci-jenkins/ --no-kvm
+    # Fetch default branches and build everything.
+    ./build.py
     
-    # Rotate the results, keep max 20 historical.
-    xsltproc --stringparam SIZE 20 log-rotate.xsl attic/log.xml >attic/log2.xml
-    mv attic/log2.xml attic/log.xml
+    # Limit paralellism
+    ./build.py --jobs 3
     
-    # Recreate the web pages under html/
-    rm -rf html
-    ./make-web.sh attic/log.xml html
+    # Fetch from non-default branches
+    ./build.py --helenos-repository lp:~your-name/helenos/your-branch
 
 
 Tests
