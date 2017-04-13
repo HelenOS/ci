@@ -91,13 +91,13 @@ TABLE TD, TABLE TBODY TH {
 TABLE TD, TABLE TH {
     padding: 5px 4px;
 }
-TABLE TR.result-ok TD {
+TABLE TR.result-ok TD, TABLE TD.result-ok {
     background: #cfc;
 }
-TABLE TR.result-fail TD {
+TABLE TR.result-fail TD, TABLE TD.result-fail {
     background: #fcc;
 }
-TABLE TR.result-skip TD {
+TABLE TR.result-skip TD, TABLE TD.result-skip, TABLE TD.result-na {
     background: #ccc;
 }
 TABLE TR.aborted TD {
