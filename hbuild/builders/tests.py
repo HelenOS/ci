@@ -30,14 +30,16 @@
 
 import os
 import re
+import fnmatch
 
 from hbuild.scheduler import Task
 from hbuild.builders.helenos import HelenOSBuildWithHarboursTask
 
 class GetTestListTask(Task):
-    def __init__(self, root_path):
+    def __init__(self, root_path, test_filter):
         Task.__init__(self, None)
         self.root_path = os.path.abspath(os.path.join(root_path, 'scenarios'))
+        self.test_filter = test_filter
 
     def get_scenario_list(self, root, base):
         if base == 'dummy/':
@@ -59,9 +61,20 @@ class GetTestListTask(Task):
 
     def run(self):
         files = self.get_scenario_list(self.root_path, '')
-        self.ctl.dprint('scenarios files: %s', files)
+        
+        if 'ALL' in self.test_filter:
+            self.test_filter = files
+        
+        files_filtered = []
+        for fn in files:
+            for pat in self.test_filter:
+                if fnmatch.fnmatch(fn, pat):
+                    files_filtered.append(fn)
+                    break
+        
+        self.ctl.dprint('scenarios files: %s', files_filtered)
         return {
-            'scenarios' : files,
+            'scenarios' : files_filtered,
             'scenario_dir': self.root_path
         }
 

@@ -85,6 +85,9 @@ args.add_argument('--harbours', default='ALL', dest='harbours',
     metavar='HARBOUR1[,HARBOUR2[,...]',
     help='Which harbours to build (defaults to all detected ones).'
 )
+args.add_argument('--tests', default='ALL', dest='tests',
+    metavar='TEST1[,TEST2[,...]]',
+    help='Which tests to run (shell wildcards supported).')
 args.add_argument('--jobs', default=multiprocessing.cpu_count(), dest='jobs',
     type=int,
     metavar='COUNT',
@@ -163,7 +166,7 @@ extra_builds = HelenOSExtraBuildsManager(scheduler)
 # Tests
 scheduler.submit("Determine available test scenarios",
     "tests-get-list",
-    GetTestListTask(config.self_path),
+    GetTestListTask(config.self_path, config.tests.split(',')),
     [])
 
 scheduler.submit("Schedule tests",
