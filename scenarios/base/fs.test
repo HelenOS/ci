@@ -39,30 +39,33 @@ xx_cmd "fat" \
     error="Failed to start FAT service." \
     timeout=20
 
+# Create a dedicated mountpoint
+xx_cmd "mkdir /tmp/mnt" timeout=20 
+
 # Mount the filesystem.
 # Error in this command results in the word 'Unable' to appear on the screen.
-xx_cmd "mount fat /data fbd0" die_on="Unable"
+xx_cmd "mount fat /tmp/mnt fbd0" die_on="Unable"
 xx_die_on "Unable"
 
 # Copy the file to the mounted filesystem.
-xx_cmd "cp demo.txt /data" error="Copying demo.txt failed"
+xx_cmd "cp demo.txt /tmp/mnt" error="Copying demo.txt failed"
 
 # Check that the file is copied there.
 # We need to clear the screen as the word demo.txt was used in the previous
 # command.
 xx_cls
-xx_cmd "ls /data" assert="demo.txt"
+xx_cmd "ls /tmp/mnt" assert="demo.txt"
 
 
 # Remount the image and check the file is still there (cls is needed again).
-xx_cmd "umount /data"
+xx_cmd "umount /tmp/mnt"
 xx_sleep 3
-xx_cmd "mount fat /data fbd0" die_on="Unable"
+xx_cmd "mount fat /tmp/mnt fbd0" die_on="Unable"
 xx_cls
-xx_cmd "ls /data" assert="demo.txt" error="demo.txt disappeared from the FAT image."
+xx_cmd "ls /tmp/mnt" assert="demo.txt" error="demo.txt disappeared from the FAT image."
 
 
 # Not necessary, really.
-xx_cmd "umount /data"
+xx_cmd "umount /tmp/mnt"
 
 xx_stop_machine
