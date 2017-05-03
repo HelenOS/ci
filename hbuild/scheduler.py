@@ -33,12 +33,9 @@ import os
 import time
 import datetime
 import shutil
-import colorama
 import sys
 
 from threading import Lock, Condition
-
-colorama.init()
 
 class Task:
     def __init__(self, report_tag, **report_args):
@@ -100,7 +97,7 @@ class RunCommandException(TaskException):
         Exception.__init__(self, msg)
 
 class TaskController:
-    def __init__(self, name, data, build_directory, artefact_directory, print_debug = False):
+    def __init__(self, name, data, build_directory, artefact_directory, printer, print_debug = False):
         self.name = name
         self.data = data
         self.files = []
@@ -108,16 +105,15 @@ class TaskController:
         self.log_tail = []
         self.build_directory = build_directory
         self.artefact_directory = artefact_directory
+        self.printer = printer
         self.print_debug_messages = print_debug
     
     def derive(self, name, data):
-        return TaskController(name, data, self.build_directory, self.artefact_directory, self.print_debug_messages)
+        return TaskController(name, data, self.build_directory, self.artefact_directory, self.printer, self.print_debug_messages)
     
     def dprint(self, str, *args):
         if self.print_debug_messages:
-            from colorama import Fore, Style
-        
-            print(Style.RESET_ALL + "[" + Fore.YELLOW + "debug " + self.name + Style.RESET_ALL + "]: " + str % args)
+            self.printer.print_debug(self.name, str % args)
         
     
     def get_dependency_data(self, dep, key=None):
@@ -276,17 +272,19 @@ class TaskWrapper:
 
 
 class BuildScheduler:
-    def __init__(self, max_workers, build, artefact, build_id, debug = False):
+    def __init__(self, max_workers, build, artefact, build_id, printer, debug = False):
         self.config = {
             'build-directory': build,
             'artefact-directory': artefact,
         }
-        
+
+        self.printer = printer
+
         self.start_timestamp = time.time()
         self.start_date = datetime.datetime.now(datetime.timezone.utc).replace(microsecond=0).astimezone().isoformat(' ')
 
         # Parent task controller
-        self.ctl = TaskController('scheduler', {}, build, artefact, debug)
+        self.ctl = TaskController('scheduler', {}, build, artefact, self.printer, debug)
 
         # Start the log file
         self.report_file = self.ctl.open_downloadable_file('report.xml', 'w')
@@ -566,30 +564,25 @@ class BuildScheduler:
                     return ( task_id, True )
         return ( None, None )
 
-
     def announce_task_started_(self, task):
-        with self.output_lock:
-            print(colorama.Style.RESET_ALL + "       " + task.description + " ...", flush=True)
-            sys.stdout.flush()
+        self.printer.print_starting(task.description + " ...")
     
     def announce_task_finished_(self, task):
         description = task.description
         if task.status == 'ok':
             msg = 'done'
-            msg_color = colorama.Fore.GREEN
+            msg_color = self.printer.GREEN
             description = description + '.'
         elif task.status == 'skip':
             msg = 'skip'
-            msg_color = colorama.Fore.CYAN
+            msg_color = self.printer.CYAN
             description = description + ': ' + task.reason
         else:
             msg = 'fail'
-            msg_color = colorama.Fore.RED
+            msg_color = self.printer.RED
             description = description + ': ' + task.reason
-
-        with self.output_lock:
-            print(colorama.Style.RESET_ALL + "[" + msg_color + msg + colorama.Style.RESET_ALL + "] " + description, flush=True)
-            sys.stdout.flush()
+        
+        self.printer.print_finished(msg_color, msg, description)
 
 
     def barrier(self):

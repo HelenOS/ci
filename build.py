@@ -40,6 +40,7 @@ from hbuild.builders.helenos import *
 from hbuild.builders.coastline import *
 from hbuild.builders.tests import *
 from hbuild.web import *
+from hbuild.output import ConsolePrinter
 
 def create_checkout_task(name, url):
     if url.startswith("wip://"):
@@ -93,6 +94,10 @@ args.add_argument('--jobs', default=multiprocessing.cpu_count(), dest='jobs',
     metavar='COUNT',
     help='Number of concurrent jobs.'
 )
+args.add_argument('--no-colors', default=False, dest='no_colors',
+    action='store_true',
+    help='Disable colorful output'
+)
 args.add_argument('--debug', default=False, dest='debug',
     action='store_true',
     help='Print debugging messages'
@@ -103,11 +108,14 @@ config.artefact_directory = os.path.abspath(config.artefact_directory)
 config.build_directory = os.path.abspath(config.build_directory)
 config.self_path = os.path.dirname(os.path.realpath(sys.argv[0]))
 
+printer = ConsolePrinter(config.no_colors)
+
 scheduler = BuildScheduler(
     max_workers=config.jobs,
     build=config.build_directory,
     artefact=config.artefact_directory,
     build_id=config.build_id,
+    printer=printer,
     debug=config.debug
 )
 
