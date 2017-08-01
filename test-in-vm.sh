@@ -385,12 +385,12 @@ xx_do_complex_text_waiting() {
             return 0
         fi
         
-        if $5 && grep -q '^.*/ # _[ ]*$' <"$XX_TEMP/$1-term.txt" ; then
-            return 0
-        fi
-        
         if $6 && grep -q -e 'Cannot spawn' -e 'Command failed' <"$XX_TEMP/$1-term.txt"; then
             return 4
+        fi
+        
+        if $5 && grep -q '^.*/ # _[ ]*$' <"$XX_TEMP/$1-term.txt" ; then
+            return 0
         fi
         
         if [ `date +%s` -gt $2 ]; then
