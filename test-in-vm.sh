@@ -46,6 +46,11 @@ xx_debug() {
     $XX_DEBUG_ECHO "   :" "$@"
 }
 
+xx_debug_filter() {
+    sed 's#.*#   : &#'
+}
+
+
 xx_run_debug() {
     xx_debug "$@"
     "$@"
@@ -350,6 +355,22 @@ xx_do_screenshot() {
         
         if [ -n "$4" ]; then
             xx_do_ocr "$3" | paste -sd '' | fold -w 80 >"$4"
+            if $XX_DUMP_TERMINAL; then
+                local print_it=false
+                if [ -e "$4.previous" ]; then
+                    if ! cmp --quiet "$4.previous" "$4"; then
+                        print_it=true
+                    fi
+                else
+                    print_it=true
+                fi
+                
+                if $print_it; then
+                    xx_debug "Terminal content:"
+                    sed 's#.*# | &#' <"$4" | xx_debug_filter
+                fi
+                cat "$4" >"$4.previous"
+            fi
         fi
     fi
 }
@@ -472,6 +493,7 @@ XX_MY_HOME=`dirname -- "$XX_MY_HOME"`
 
 XX_DEBUG_ECHO=:
 XX_ACTIVITY_ECHO=:
+XX_DUMP_TERMINAL=false
 XX_TRAIN_OCR=false
 XX_HEADLESS=false
 XX_USE_KVM=true
@@ -505,6 +527,10 @@ while [ $# -gt 0 ]; do
             ;;
         --activity)
             XX_ACTIVITY_ECHO=echo
+            ;;
+        --dump-terminal)
+            XX_DUMP_TERMINAL=true
+            XX_DEBUG_ECHO=echo
             ;;
         --root=*)
             XX_HELENOS_ROOT=`echo "$1" | cut '-d=' -f 2-`
