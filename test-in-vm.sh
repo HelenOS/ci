@@ -635,7 +635,7 @@ for i in "$@"; do
     fi
     echo "# Scenario $i terminated, $res."
     printf '%-35s  %4s\n' "$i" "$res" >>"$XX_RESULT_SUMMARY"
-    if $FAIL_FAST && [ "$res" = "FAIL" ]; then
+    if $XX_FAIL_FAST && [ "$res" = "FAIL" ]; then
         exit 1
     fi
 done
