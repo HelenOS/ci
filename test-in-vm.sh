@@ -376,10 +376,10 @@ xx_do_complex_text_waiting() {
         fi
         
         if [ -n "$4" ] && grep -q "$4" <"$XX_TEMP/$1-term.txt" ; then
-	        return 0
-	    fi
-	    
-	    if $5 && grep -q '^.*/ # _[ ]*$' <"$XX_TEMP/$1-term.txt" ; then
+            return 0
+        fi
+        
+        if $5 && grep -q '^.*/ # _[ ]*$' <"$XX_TEMP/$1-term.txt" ; then
             return 0
         fi
         
@@ -564,16 +564,16 @@ if $XX_TRAIN_OCR; then
     # Set to false to debug the script below without running QEMU
     # all the time
     if true; then
-	    xx_start_machine name=ocr vterm=false
-	    xx_echo "Will display the training set on the VM screen"
-	    xx_echo "(this will take a while)."
-	    sleep 20
-	    xx_do_type ocr "cat train-ocr.txt"
-	    sleep 1
-	    xx_do_qemu_command ocr "sendkey ret"
-	    sleep 5
-	    xx_do_screenshot ocr "$XX_TEMP/ocr-full.ppm" "$XX_TEMP/ocr-term.png"
-	    xx_stop_machine
+        xx_start_machine name=ocr vterm=false
+        xx_echo "Will display the training set on the VM screen"
+        xx_echo "(this will take a while)."
+        sleep 20
+        xx_do_type ocr "cat train-ocr.txt"
+        sleep 1
+        xx_do_qemu_command ocr "sendkey ret"
+        sleep 5
+        xx_do_screenshot ocr "$XX_TEMP/ocr-full.ppm" "$XX_TEMP/ocr-term.png"
+        xx_stop_machine
     fi
     
     xx_echo "Doing OCR..."
