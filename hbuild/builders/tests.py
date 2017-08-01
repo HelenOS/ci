@@ -214,6 +214,8 @@ class TestRunTask(Task):
             '--headless',
             '--fail-fast',
             '--debug',
+            '--dump-terminal',
+            '--activity',
             '--arch={}'.format(self.profile),
             '--image={}'.format(os_image),
             '--no-kvm',
