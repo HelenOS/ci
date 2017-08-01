@@ -134,13 +134,7 @@ xx_get_var() {
 xx_get_def_var() {
     local i
     for i in "$@"; do
-        case $i in
-            *=*)
-                ;;
-            *)
-                echo "$i"
-                ;;
-        esac
+        echo "$i" | grep -v '^[a-zA-Z][a-zA-Z0-9_]*='
     done
     echo
 }
