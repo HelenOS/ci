@@ -335,7 +335,19 @@ xx_do_ocr() {
 xx_do_screenshot() {
     xx_do_qemu_command "$1" "screendump $2"
     if [ -n "$3" ]; then
-        convert "$2" -crop 640x480+4+24 +repage -colors 2 -monochrome "$3"
+        # Looping as the screenshot might take some time to save
+        local retries=3
+        while true; do
+            if convert "$2" -crop 640x480+4+24 +repage -colors 2 -monochrome "$3"; then
+                break
+            fi
+            retries=$(( $retries - 1 ))
+            if [ $retries -le 0 ]; then
+                xx_fatal "Failed to convert screen to monochrome."
+            fi
+            sleep 1
+        done
+        
         if [ -n "$4" ]; then
             xx_do_ocr "$3" | paste -sd '' | fold -w 80 >"$4"
         fi
