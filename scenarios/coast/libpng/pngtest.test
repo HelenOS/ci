@@ -1,0 +1,9 @@
+#!/bin/sh
+
+# @needs libpng
+
+xx_start_machine
+
+xx_cmd "pngtest" assert="libpng passes test" timeout=30
+
+xx_stop_machine
