@@ -66,8 +66,7 @@ class HelenOSBuildTask(Task):
             xxx, image_extension = os.path.splitext(self.image)
             target_image_name = '%s/helenos-%s%s' % ( profile_flat, profile_flat, image_extension )
             build_image_name = '%s/%s' % ( my_dir, self.image )
-            self.ctl.add_downloadable_file("HelenOS boot image", target_image_name, build_image_name)
-            ret['image'] = build_image_name
+            ret['image'] = self.ctl.add_downloadable_file("HelenOS boot image", target_image_name, build_image_name)
         
         return ret
 
@@ -105,8 +104,7 @@ class HelenOSBuildWithHarboursTask(Task):
             xxx, image_extension = os.path.splitext(image_name)
             target_image_name = '{}/helenos-{}-with-{}{}'.format( profile_flat, profile_flat, '-'.join(self.harbours), image_extension )
             build_image_name = os.path.join(my_dir, image_name)
-            self.ctl.add_downloadable_file("HelenOS boot image with {}".format(', '.join(self.harbours)), target_image_name, build_image_name)
-            ret['image'] = build_image_name
+            ret['image'] = self.ctl.add_downloadable_file("HelenOS boot image with {}".format(', '.join(self.harbours)), target_image_name, build_image_name)
             
         return ret
 

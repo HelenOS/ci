@@ -198,6 +198,8 @@ class TaskController:
         
         target = self.get_artefact_absolute_path(download_name, True)
         shutil.copy(current_filename, target)
+        
+        return target
     
     def open_downloadable_file(self, download_name, mode):
         return open(self.get_artefact_absolute_path(download_name, True), mode)
