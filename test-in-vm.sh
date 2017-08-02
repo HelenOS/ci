@@ -222,7 +222,7 @@ xx_start_machine() {
         -redir tcp:8080::8080 -redir tcp:8081::8081 \
         -redir tcp:2223::2223 \
         -usb \
-        -m 256 \
+        -m "${XX_MEMORY_MB}" \
         -daemonize -pidfile "$XX_TEMP/$name.pid" \
         -monitor "unix:$XX_TEMP/$name.monitor,server,nowait" \
         -boot d \
@@ -479,6 +479,7 @@ where [options] are:
 --image=FILE    File with main HelenOS image (specify --arch).
 --arch=ARCH     Architecture of the image file (see --image).
 --no-kvm        Do not try to run QEMU with KVM enabled.
+--memory=INT    Size of VM RAM in INT MB.
 --fail-fast     Exit with first error.
 --debug         Print (a lot of) debugging messages.
 --activity      Print messages about background activity.
@@ -505,6 +506,7 @@ XX_HELENOS_ROOT="."
 XX_AUTODETECT_HELENOS=false
 XX_ARCH=""
 XX_CDROM_FILE=""
+XX_MEMORY_MB=""
 XX_FAIL_FAST=false
 
 XX_KNOWN_MACHINES=""
@@ -547,6 +549,12 @@ while [ $# -gt 0 ]; do
             XX_ARCH=`echo "$1" | cut '-d=' -f 2-`
             XX_AUTODETECT_HELENOS=false
             ;;
+        --memory=*)
+            XX_MEMORY_MB=`echo "$1" | cut '-d=' -f 2-`
+            if ! echo "$XX_MEMORY_MB" | grep -q '^[1-9][0-9]*$'; then
+                xx_fatal "--memory has to be provided as an integer."
+            fi
+            ;;
         --temp=*)
             XX_TEMP=`echo "$1" | cut '-d=' -f 2-`
             ;;
@@ -569,6 +577,8 @@ while [ $# -gt 0 ]; do
     esac
     shift
 done
+
+[ -z "$XX_MEMORY_MB" ] && XX_MEMORY_MB=256
 
 mkdir -p "$XX_TEMP"
 
