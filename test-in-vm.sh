@@ -410,7 +410,7 @@ xx_do_complex_text_waiting() {
             return 4
         fi
         
-        if $5 && grep -q '^.*/ # _[ ]*$' <"$XX_TEMP/$1-term.txt" ; then
+        if $5 && grep -q '^/[-a-zA-Z0-9_/.]* # _[ ]*$' <"$XX_TEMP/$1-term.txt" ; then
             return 0
         fi
         
