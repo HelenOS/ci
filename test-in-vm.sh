@@ -479,8 +479,11 @@ where [options] are:
 --image=FILE    File with main HelenOS image (specify --arch).
 --arch=ARCH     Architecture of the image file (see --image).
 --no-kvm        Do not try to run QEMU with KVM enabled.
---fail-fast      Exit with first error.
+--fail-fast     Exit with first error.
 --debug         Print (a lot of) debugging messages.
+--activity      Print messages about background activity.
+--dump-terminal Print contents of the vterm (implies --debug).
+--train-ocr     For experts: train OCR for vterm contents.
 
 EOF_USAGE
 }
