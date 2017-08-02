@@ -236,7 +236,7 @@ xx_start_machine() {
     
     if $wait_for_vterm; then
         xx_echo2 "Waiting for OS to boot into GUI..."
-        if ! xx_do_wait_for_text "$name" `xx_do_compute_timeout 15` "to see a few survival tips"; then
+        if ! xx_do_wait_for_text "$name" `xx_do_compute_timeout 60` "to see a few survival tips"; then
             xx_fatal "OS have not booted into a known state."
         fi
     fi
