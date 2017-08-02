@@ -206,9 +206,9 @@ xx_start_machine() {
     xx_echo "Starting machine $name from $cdrom."
     
     local qemu_command=""
-    if [ $XX_ARCH == "ia32" ]; then
+    if [ "$XX_ARCH" == "ia32" ]; then
         qemu_command=qemu-system-i386
-    elif [ $XX_ARCH == "amd64" ]; then
+    elif [ "$XX_ARCH" == "amd64" ]; then
         qemu_command=qemu-system-x86_64
     fi
     if [ -z "$qemu_command" ]; then
