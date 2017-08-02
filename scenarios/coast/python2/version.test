@@ -1,0 +1,9 @@
+#!/bin/sh
+
+# @needs python2
+
+xx_start_machine
+
+xx_cmd "python --version" assert="Python 2.7"
+
+xx_stop_machine
