@@ -88,7 +88,13 @@ args.add_argument('--harbours', default='ALL', dest='harbours',
 )
 args.add_argument('--tests', default='ALL', dest='tests',
     metavar='TEST1[,TEST2[,...]]',
-    help='Which tests to run (shell wildcards supported).')
+    help='Which tests to run (shell wildcards supported).'
+)
+args.add_argument('--vm-memory-size', default=256, dest='vm_memory_size',
+    type=int,
+    metavar='RAM_SIZE_IN_MB',
+    help='How much memory to give the virtual machine running the tests.'
+)
 args.add_argument('--jobs', default=multiprocessing.cpu_count(), dest='jobs',
     type=int,
     metavar='COUNT',
@@ -109,6 +115,10 @@ config.build_directory = os.path.abspath(config.build_directory)
 config.self_path = os.path.dirname(os.path.realpath(sys.argv[0]))
 
 printer = ConsolePrinter(config.no_colors)
+
+if config.vm_memory_size < 8:
+    printer.print_warning("VM memory size too small, upgrading to 8MB.")
+    config.vm_memory_size = 8
 
 scheduler = BuildScheduler(
     max_workers=config.jobs,
@@ -179,7 +189,11 @@ scheduler.submit("Determine available test scenarios",
 
 scheduler.submit("Schedule tests",
     "tests-schedule",
-    ScheduleTestsTask(scheduler, extra_builds, config.self_path),
+    ScheduleTestsTask(scheduler, 
+        extra_builds,
+        config.self_path,
+        [ "--memory={}".format(config.vm_memory_size) ]
+    ),
     [
         "tests-get-list",
         "helenos-build",

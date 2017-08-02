@@ -83,11 +83,12 @@ class ScheduleTestsTask(Task):
     NEEDED_HARBOUR_PATTERN = re.compile('^[ ]*#[ ]*@needs[ ]+(?P<HARBOURS>.*)$')
     SPLIT_HARBOURS_PATTERN = re.compile('\w+')
     
-    def __init__(self, scheduler, extra_builds, base_path):
+    def __init__(self, scheduler, extra_builds, base_path, extra_tester_options):
         self.scheduler = scheduler
         self.testable_profiles = [ 'ia32', 'amd64' ]
         self.extra_builds = extra_builds
         self.base_path = base_path
+        self.extra_tester_options = extra_tester_options
         Task.__init__(self, None)
     
     def run(self):
@@ -120,7 +121,7 @@ class ScheduleTestsTask(Task):
                 self.scheduler.submit("Testing {} on {}".format(scenario, profile),
                     'test-{}-{}'.format(profile.replace('/', '-'), scenario_flat),
                     TestRunTask(profile, scenario, scenario_filename,
-                        os.path.abspath(os.path.join(self.base_path, 'test-in-vm.sh'))),
+                        os.path.abspath(os.path.join(self.base_path, 'test-in-vm.sh')), self.extra_tester_options),
                     [ helenos_task ],
                     [ 'qemu-kvm' ]
                 )
@@ -199,17 +200,18 @@ class ScheduleTestsTask(Task):
         return res
 
 class TestRunTask(Task):
-    def __init__(self, profile, scenario_name, scenario_full_filename, test_script_filename):
+    def __init__(self, profile, scenario_name, scenario_full_filename, test_script_filename, extra_test_script_options):
         self.profile = profile
         self.scenario = scenario_full_filename
         self.tester = os.path.abspath(test_script_filename)
+        self.tester_options = extra_test_script_options
         Task.__init__(self, 'test', arch=profile, scenario=scenario_name)
 
     def run(self):
         os_image = self.ctl.get_dependency_data('image')
         if os_image is None:
             return False
-        res = self.ctl.run_command([
+        command = [
             self.tester,
             '--headless',
             '--fail-fast',
@@ -219,6 +221,9 @@ class TestRunTask(Task):
             '--arch={}'.format(self.profile),
             '--image={}'.format(os_image),
             '--no-kvm',
-            self.scenario,
-        ])
+        ]
+        for i in self.tester_options:
+            command.append(i)
+        command.append(self.scenario)
+        res = self.ctl.run_command(command)
         return res

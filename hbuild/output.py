@@ -86,3 +86,6 @@ class ConsolePrinter:
     
     def print_debug(self, context, message):
         self.print_finished(self.YELLOW, "debug " + context, message)
+    
+    def print_warning(self, message):
+        self.print_finished(self.RED, "warn", message)
