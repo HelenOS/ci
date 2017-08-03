@@ -132,6 +132,10 @@ TABLE.matrix {
     width: 100%;
     text-align: center;
 }
+TABLE.matrix TH {
+    text-overflow: '';
+    overflow: hidden;
+}
 #quick-links {
     line-height: 3em;
     padding: 2em 0;

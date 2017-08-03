@@ -185,6 +185,26 @@
                         </xsl:for-each>
                     </tr>
                 </xsl:for-each>
+                <xsl:for-each select="*[@scenario and count(. | key('by-scenario', @scenario)[parent::build = $BUILD][1]) = 1]">
+                    <xsl:sort select="@scenario" />
+                    <xsl:variable name="SCENARIO" select="@scenario" />
+                    <tr>
+                        <th title="{$SCENARIO}" style="white-space: nowrap;"><xsl:value-of select="$SCENARIO" /></th>
+                        <xsl:for-each select="//*[@arch and count(. | key('by-arch', @arch)[parent::build = $BUILD][1]) = 1]">
+                            <xsl:sort select="@arch" />
+                            <xsl:variable name="ARCH" select="@arch" />
+                            <xsl:variable name="RESULT" select="//test[@arch=$ARCH and @scenario=$SCENARIO]" />
+                            <xsl:choose>
+                                <xsl:when test="$RESULT">
+                                    <td class="result-{$RESULT/@result}"><xsl:apply-templates select="$RESULT" mode="log-link-matrix" /></td>
+                                </xsl:when>
+                                <xsl:otherwise>
+                                    <td class="result-na">N/A</td>
+                                </xsl:otherwise>
+                            </xsl:choose>
+                        </xsl:for-each>
+                    </tr>
+                </xsl:for-each>
             </tbody>
         </table>
         
