@@ -93,6 +93,7 @@
         <div class="quick-link-group">
         <h3>Miscellaneous</h3>
         <ul>
+        	<li><a href="#matrix">Summary matrix</a></li>
             <li><a href="#failures">List of failed tasks</a></li>
             <xsl:if test="helenos-build">
                 <li><a href="#helenos">HelenOS</a></li>
@@ -141,7 +142,7 @@
         
         </div>
         
-        <h2>Summary matrix<xsl:copy-of select="$LINK_TO_TOP" /></h2>
+        <h2 id="matrix">Summary matrix<xsl:copy-of select="$LINK_TO_TOP" /></h2>
         <table class="matrix">
             <thead>
             <tr>
