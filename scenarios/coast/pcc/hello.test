@@ -1,0 +1,11 @@
+#!/bin/sh
+
+# @needs pcc binutils
+
+xx_start_machine
+
+xx_cmd "cd /src/c/demos/hello"
+xx_cmd "pcc hello.c" timeout=30
+xx_cmd "./a.out" assert="hello!"
+
+xx_stop_machine
