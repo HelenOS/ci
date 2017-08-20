@@ -150,14 +150,18 @@
                 <xsl:for-each select="*[@arch and count(. | key('by-arch', @arch)[parent::build = $BUILD][1]) = 1]">
                     <xsl:sort select="@arch" />
                     <th>
-                        <xsl:apply-templates select="@arch" mode="architecture-with-hyphens" />
+                        <a href="#arch-{@arch}">
+                            <xsl:apply-templates select="@arch" mode="architecture-with-hyphens" />
+                        </a>
                     </th>
                 </xsl:for-each>
             </tr>
             </thead>
             <tbody>
                 <tr>
-                    <th>HelenOS</th>
+                    <th>
+                        <a href="#helenos">HelenOS</a>
+                    </th>
                     <xsl:for-each select="*[@arch and count(. | key('by-arch', @arch)[parent::build = $BUILD][1]) = 1]">
 	                    <xsl:sort select="@arch" />
 	                    <xsl:variable name="ARCH" select="@arch" />
@@ -169,7 +173,11 @@
                     <xsl:sort select="@package" />
                     <xsl:variable name="PKG" select="@package" />
                     <tr>
-                        <th><xsl:value-of select="$PKG" /></th>
+                        <th>
+                            <a href="#harbour-{$PKG}">
+                                <xsl:value-of select="$PKG" />
+                            </a>
+                        </th>
                         <xsl:for-each select="//*[@arch and count(. | key('by-arch', @arch)[parent::build = $BUILD][1]) = 1]">
                             <xsl:sort select="@arch" />
                             <xsl:variable name="ARCH" select="@arch" />
@@ -189,7 +197,11 @@
                     <xsl:sort select="@scenario" />
                     <xsl:variable name="SCENARIO" select="@scenario" />
                     <tr>
-                        <th title="{$SCENARIO}" style="white-space: nowrap;"><xsl:value-of select="$SCENARIO" /></th>
+                        <th style="white-space: nowrap;">
+                            <a title="{$SCENARIO}" href="#scenario-{$SCENARIO}">
+                                <xsl:value-of select="$SCENARIO" />
+                            </a>
+                        </th>
                         <xsl:for-each select="//*[@arch and count(. | key('by-arch', @arch)[parent::build = $BUILD][1]) = 1]">
                             <xsl:sort select="@arch" />
                             <xsl:variable name="ARCH" select="@arch" />
