@@ -37,7 +37,7 @@ def sorted_dir(root):
     list.sort()
     return list
 
-def create_hsct_conf(dir, profile, repo_dir, sources = None):
+def create_hsct_conf(dir, profile, repo_dir, archive_format, sources = None):
     with open(dir + '/hsct.conf', 'w') as f:
         if profile == 'mips32/malta-be':
             profile = 'mips32eb/malta-be'
@@ -48,6 +48,7 @@ def create_hsct_conf(dir, profile, repo_dir, sources = None):
         f.write("arch = %s\n" % profile_parts[0])
         f.write("machine = %s\n" % profile_parts[1])
         f.write("parallel = 1\n")
+        f.write("archive_format = %s\n" % archive_format)
         if not sources is None:
             f.write("sources = %s\n" % sources)
 
@@ -156,7 +157,7 @@ class CoastlineScheduleFetchesTask(Task):
         coastline_root = self.ctl.make_temp_dir('repo/coastline')
 
         mirror = self.ctl.make_temp_dir('mirror')
-        create_hsct_conf(mirror, 'mirror', 'not-really-needed')
+        create_hsct_conf(mirror, 'mirror', 'not-really-needed', '')
 
         tasks = {}
         for h in harbours:
@@ -170,9 +171,10 @@ class CoastlineScheduleFetchesTask(Task):
         }
 
 class CoastlinePrebuildTask(Task):
-    def __init__(self, profile, build_dir_basename):
+    def __init__(self, profile, build_dir_basename, archive_format):
         self.profile = profile
         self.build_dir_basename = build_dir_basename
+        self.archive_format = archive_format
         Task.__init__(self, None)
     
     def run(self):
@@ -181,12 +183,14 @@ class CoastlinePrebuildTask(Task):
         my_dir = self.ctl.make_temp_dir('build/%s/coast' % self.build_dir_basename)
         create_hsct_conf(my_dir, self.profile,
             self.ctl.make_temp_dir('build/%s/helenos' % self.build_dir_basename),
+            self.archive_format,
             self.ctl.make_temp_dir('mirror/sources'))
         
         self.ctl.run_command([ root + '/hsct.sh', 'update' ], cwd=my_dir)
         
         create_hsct_conf(my_dir, self.profile,
             self.ctl.make_temp_dir('build/%s/helenos-nonexistent' % self.build_dir_basename),
+            self.archive_format,
             self.ctl.make_temp_dir('mirror/sources'))
         
         return {
@@ -194,9 +198,10 @@ class CoastlinePrebuildTask(Task):
         }
 
 class CoastlineBuildTask(Task):
-    def __init__(self, harbour, profile):
+    def __init__(self, harbour, profile, archive_format):
         self.harbour = harbour
         self.profile = profile
+        self.archive_format = archive_format
         Task.__init__(self, 'harbour-build', package=harbour, arch=profile)
     
     def run(self):
@@ -211,8 +216,8 @@ class CoastlineBuildTask(Task):
         # Add downloadable archive
         profile_flat = self.profile.replace("/", "-")
         title = "%s for %s" % ( self.harbour, self.profile )
-        target_filename = '%s/%s-for-helenos-%s.tar.xz' % ( profile_flat, self.harbour, profile_flat )
-        current_filename = '%s/archives/%s.tar.xz' % ( my_dir, self.harbour )
+        target_filename = '%s/%s-for-helenos-%s.%s' % ( profile_flat, self.harbour, profile_flat, self.archive_format )
+        current_filename = '%s/archives/%s.%s' % ( my_dir, self.harbour, self.archive_format )
         self.ctl.add_downloadable_file(title, target_filename, current_filename)
         
         return {
@@ -221,8 +226,9 @@ class CoastlineBuildTask(Task):
 
 
 class CoastlineScheduleBuildsTask(Task):
-    def __init__(self, scheduler):
+    def __init__(self, scheduler, archive_format):
         self.scheduler = scheduler
+        self.archive_format =archive_format
         Task.__init__(self, None)
     
     def run(self):
@@ -242,7 +248,7 @@ class CoastlineScheduleBuildsTask(Task):
             
             self.scheduler.submit("Preparing coastline for %s" % p,
                 "coastline-prepare-for-%s" % p_flat,
-                CoastlinePrebuildTask(p, p_flat),
+                CoastlinePrebuildTask(p, p_flat, self.archive_format),
                 [ "helenos-build-%s" % p_flat ])
             
             for h in harbours:    
@@ -255,7 +261,7 @@ class CoastlineScheduleBuildsTask(Task):
                     deps.append( "coastline-build-%s-for-%s" % (d, p_flat) )
                 self.scheduler.submit("Building %s for %s" % (h, p),
                     task_name,
-                    CoastlineBuildTask(h, p),
+                    CoastlineBuildTask(h, p, self.archive_format),
                     deps)
                 
                 ret[p][h] = task_name

@@ -95,6 +95,11 @@ args.add_argument('--vm-memory-size', default=256, dest='vm_memory_size',
     metavar='RAM_SIZE_IN_MB',
     help='How much memory to give the virtual machine running the tests.'
 )
+args.add_argument('--archive-format', default='tar.xz', dest='archive_format',
+    choices=['tar.xz', 'tar.gz'],
+    metavar='FORMAT',
+    help='Format of the archives (tar.gz or tar.xz).'
+)
 args.add_argument('--jobs', default=multiprocessing.cpu_count(), dest='jobs',
     type=int,
     metavar='COUNT',
@@ -169,7 +174,7 @@ scheduler.submit("Schedule harbour tarballs fetches",
 
 scheduler.submit("Schedule Coastline builds",
     "coastline-build",
-    CoastlineScheduleBuildsTask(scheduler),
+    CoastlineScheduleBuildsTask(scheduler, config.archive_format),
     [
         # Data dependencies
         "helenos-get-profiles", "coastline-get-harbours",
