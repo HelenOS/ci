@@ -86,7 +86,13 @@ class HelenOSBuildWithHarboursTask(Task):
         # Unpack the tarball
         for h in self.harbours:
             tarball = self.ctl.get_dependency_data('harbour-{}'.format(h))
-            res = self.ctl.run_command(['tar', 'xJf', tarball], cwd=os.path.join(my_dir, 'uspace', 'overlay'))
+            if tarball.endswith('.tar.xz'):
+                command = [ 'tar', 'xJf', tarball ]
+            elif tarball.endswith('.tar.gz'):
+                command = [ 'tar', 'xzf', tarball ]
+            else:
+                return False
+            res = self.ctl.run_command(command, cwd=os.path.join(my_dir, 'uspace', 'overlay'))
             if res['failed']:
                 return False
         
