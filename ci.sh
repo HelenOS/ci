@@ -124,7 +124,7 @@ for i in main.css jquery-2.1.4.min.js; do
 done
 
 # New-enough builds
-KEPT_BUILDS=`list_build_numbers "$CI_WEB_ROOT" | tail -n $CI_HISTORY_LENGTH | grep -v "^$BUILD_NUMBER\$" | paste '-sd '`
+KEPT_BUILDS=`list_build_numbers "$CI_WEB_ROOT" | head -n $CI_HISTORY_LENGTH | grep -v "^$BUILD_NUMBER\$" | paste '-sd '`
 
 # Recreate the index page
 xsltproc \
