@@ -145,6 +145,13 @@ for i in `list_build_numbers "$CI_WEB_ROOT" | tail -n +$(( $CI_HISTORY_LENGTH + 
     rm -rf "$CI_WEB_ROOT/build-$i"
 done
 
+# Keep latest/ pointing to the latest build
+(
+    cd "$CI_WEB_ROOT"
+    ln -sTf "build-$BUILD_NUMBER" latest
+)
+
+
 )
 
 rmdir "$LOCK_DIR"
