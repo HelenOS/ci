@@ -95,6 +95,11 @@ args.add_argument('--vm-memory-size', default=256, dest='vm_memory_size',
     metavar='RAM_SIZE_IN_MB',
     help='How much memory to give the virtual machine running the tests.'
 )
+args.add_argument('--inline-log-lines', default=10, dest='inline_log_lines',
+    type=int,
+    metavar='LINES',
+    help='How many lines of log to show on the web page.'
+)
 args.add_argument('--archive-format', default='tar.xz', dest='archive_format',
     choices=['tar.xz', 'tar.gz'],
     metavar='FORMAT',
@@ -131,6 +136,7 @@ scheduler = BuildScheduler(
     artefact=config.artefact_directory,
     build_id=config.build_id,
     printer=printer,
+    inline_log_lines=config.inline_log_lines,
     debug=config.debug
 )
 

@@ -97,7 +97,7 @@ class RunCommandException(TaskException):
         Exception.__init__(self, msg)
 
 class TaskController:
-    def __init__(self, name, data, build_directory, artefact_directory, printer, print_debug = False):
+    def __init__(self, name, data, build_directory, artefact_directory, printer, kept_log_lines, print_debug = False):
         self.name = name
         self.data = data
         self.files = []
@@ -106,10 +106,12 @@ class TaskController:
         self.build_directory = build_directory
         self.artefact_directory = artefact_directory
         self.printer = printer
+        self.kept_log_lines = kept_log_lines
         self.print_debug_messages = print_debug
     
     def derive(self, name, data):
-        return TaskController(name, data, self.build_directory, self.artefact_directory, self.printer, self.print_debug_messages)
+        return TaskController(name, data, self.build_directory, self.artefact_directory,
+            self.printer, self.kept_log_lines, self.print_debug_messages)
     
     def dprint(self, str, *args):
         if self.print_debug_messages:
@@ -176,7 +178,7 @@ class TaskController:
         if not self.log is None:
             self.log.write(line + '\n')
         self.log_tail.append(line)
-        self.log_tail = self.log_tail[-10:]
+        self.log_tail = self.log_tail[-self.kept_log_lines:]
     
     def get_artefact_absolute_path(self, relative_name, create_dirs=False):
         base = os.path.dirname(relative_name)
@@ -274,7 +276,7 @@ class TaskWrapper:
 
 
 class BuildScheduler:
-    def __init__(self, max_workers, build, artefact, build_id, printer, debug = False):
+    def __init__(self, max_workers, build, artefact, build_id, printer, inline_log_lines = 10, debug = False):
         self.config = {
             'build-directory': build,
             'artefact-directory': artefact,
@@ -286,7 +288,7 @@ class BuildScheduler:
         self.start_date = datetime.datetime.now(datetime.timezone.utc).replace(microsecond=0).astimezone().isoformat(' ')
 
         # Parent task controller
-        self.ctl = TaskController('scheduler', {}, build, artefact, self.printer, debug)
+        self.ctl = TaskController('scheduler', {}, build, artefact, self.printer, inline_log_lines, debug)
 
         # Start the log file
         self.report_file = self.ctl.open_downloadable_file('report.xml', 'w')
