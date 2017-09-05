@@ -249,8 +249,11 @@ xx_stop_machine() {
     local name=`xx_get_var name $XX_LAST_MACHINE "$@"`
     
     xx_echo "Forcefully killing machine $name."
-    xx_do_qemu_command "$name" "quit"
+    if [ -e "$XX_TEMP/$name.monitor" ]; then
+        xx_do_qemu_command "$name" "quit"
+    fi
     sleep 1
+    kill -9 `cat "$XX_TEMP/$name.pid" 2>/dev/null` 2>/dev/null
     
     if [ "$name" = "$XX_LAST_MACHINE" ]; then
         XX_LAST_MACHINE=""
@@ -672,6 +675,9 @@ for i in "$@"; do
     echo "# Starting scenario $i..."
     (
         . $i
+        for i in $XX_KNOWN_MACHINES; do
+            xx_stop_machine name="$i"
+        done
     )
     if [ $? -eq 0 ]; then
         res="OK"
