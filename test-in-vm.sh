@@ -199,17 +199,36 @@ xx_start_machine() {
     if $XX_HEADLESS; then
         extra_opts="-display none"
     fi
-    if $XX_USE_KVM; then
-        extra_opts="$extra_opts -enable-kvm"
-    fi
         
     xx_echo "Starting machine $name from $cdrom."
     
     local qemu_command=""
+    local qemu_opts=""
+    local qemu_common_network_options="-device e1000,vlan=0 -net user \
+        -redir udp:8080::8080 -redir udp:8081::8081 \
+        -redir tcp:8080::8080 -redir tcp:8081::8081 \
+        -redir tcp:2223::2223"
+    local has_grub=false
     if [ "$XX_ARCH" == "ia32" ]; then
         qemu_command=qemu-system-i386
+        qemu_opts="$qemu_common_network_options -usb -boot d -cdrom $cdrom"
+        if $XX_USE_KVM; then
+            extra_opts="$extra_opts -enable-kvm"
+        fi
+        has_grub=true
     elif [ "$XX_ARCH" == "amd64" ]; then
         qemu_command=qemu-system-x86_64
+        qemu_opts="$qemu_common_network_options -usb -boot d -cdrom $cdrom"
+        if $XX_USE_KVM; then
+            extra_opts="$extra_opts -enable-kvm"
+        fi
+        has_grub=true
+    elif [ "$XX_ARCH" == "arm32/integratorcp" ]; then
+        qemu_command=qemu-system-arm
+        qemu_opts="-M integratorcp -usb -kernel $cdrom"
+    elif [ "$XX_ARCH" == "ppc32" ]; then
+        qemu_command=qemu-system-ppc
+        qemu_opts="$qemu_common_network_options -usb -boot d -cdrom $cdrom" 
     fi
     if [ -z "$qemu_command" ]; then
         xx_fatal "Unable to find proper emulator."
@@ -217,18 +236,15 @@ xx_start_machine() {
     
     xx_run_debug $qemu_command \
         $extra_opts \
-        -device e1000,vlan=0 -net user \
-        -redir udp:8080::8080 -redir udp:8081::8081 \
-        -redir tcp:8080::8080 -redir tcp:8081::8081 \
-        -redir tcp:2223::2223 \
-        -usb \
+        $qemu_opts \
         -m "${XX_MEMORY_MB}" \
         -daemonize -pidfile "$XX_TEMP/$name.pid" \
-        -monitor "unix:$XX_TEMP/$name.monitor,server,nowait" \
-        -boot d \
-        -cdrom "$cdrom"
+        -monitor "unix:$XX_TEMP/$name.monitor,server,nowait"
     sleep 1
-    xx_do_qemu_command "$name" "sendkey ret"
+    
+    if  $has_grub; then
+        xx_do_qemu_command "$name" "sendkey ret"
+    fi
     
     XX_LAST_MACHINE=$name
     
