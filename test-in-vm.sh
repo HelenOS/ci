@@ -85,7 +85,7 @@ xx_do_qemu_command() {
     xx_debug "echo '$2' | socat STDIN 'UNIX-CONNECT:$XX_TEMP/$1.monitor'"
     echo "$2" | socat STDIN "UNIX-CONNECT:$XX_TEMP/$1.monitor"
     res=$?
-    if [ $res -ne 0 ]; then
+    if [ $res -ne 0 ] && [ "$3" != "nodie" ]; then
         xx_shutdown
     fi
 }
@@ -264,7 +264,7 @@ xx_stop_machine() {
     
     xx_echo "Forcefully killing machine $name."
     if [ -e "$XX_TEMP/$name.monitor" ]; then
-        xx_do_qemu_command "$name" "quit"
+        xx_do_qemu_command "$name" "quit" nodie
     fi
     sleep 1
     kill -9 `cat "$XX_TEMP/$name.pid" 2>/dev/null` 2>/dev/null
