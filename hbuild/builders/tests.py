@@ -85,7 +85,7 @@ class ScheduleTestsTask(Task):
     
     def __init__(self, scheduler, extra_builds, base_path, extra_tester_options):
         self.scheduler = scheduler
-        self.testable_profiles = [ 'ia32', 'amd64' ]
+        self.testable_profiles = [ 'ia32', 'amd64', 'arm32/integratorcp', 'ppc32' ]
         self.extra_builds = extra_builds
         self.base_path = base_path
         self.extra_tester_options = extra_tester_options
