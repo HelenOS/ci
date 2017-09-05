@@ -204,10 +204,8 @@ xx_start_machine() {
     
     local qemu_command=""
     local qemu_opts=""
-    local qemu_common_network_options="-device e1000,vlan=0 -net user \
-        -redir udp:8080::8080 -redir udp:8081::8081 \
-        -redir tcp:8080::8080 -redir tcp:8081::8081 \
-        -redir tcp:2223::2223"
+    local qemu_common_network_options="-device e1000,vlan=0 \
+        -net user,hostfwd=udp::8080-:8080,hostfwd=udp::8081-:8081,hostfwd=tcp::8080-:8080,hostfwd=tcp::8081-:8081,hostfwd=tcp::2223-:2223"
     local has_grub=false
     if [ "$XX_ARCH" == "ia32" ]; then
         qemu_command=qemu-system-i386
