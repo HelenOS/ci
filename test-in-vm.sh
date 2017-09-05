@@ -330,14 +330,30 @@ xx_cls() {
 }
 
 xx_do_ocr_prepare() {
-    convert "$1" -crop "8x16" +repage +adjoin txt:- \
+    local image_width=`identify -format '%w' "$1"`
+    local image_height=`identify -format '%h' "$1"`
+    local correct_size="$(( ( $image_width / 8 ) * 8 ))x$(( ( $image_height / 16 ) * 16 ))"
+    convert "$1" -crop "$correct_size" +repage -crop "8x16" +repage +adjoin txt:- \
         | sed -e 's|[0-9]*,[0-9]*: ([^)]*)[ ]*#\([0-9A-Fa-f]\{6\}\).*|\1|' -e 's:^#.*:@:' -e 's#000000#0#g' -e 's#FFFFFF#F#' \
         | sed -e ':a' -e 'N;s#\n##;s#^@##;/@$/{s#@$##p;d}' -e 't a'
 }
-    
 
 xx_do_ocr() {
-    xx_do_ocr_prepare "$1" | sed -f "$XX_MY_HOME/ocr.sed"
+    local column_count="$(( `identify -format '%w' $1` / 8 ))"  
+    local row_count="$(( `identify -format '%h' $1` / 16 ))"
+    # What we do in this magick pipeline:
+    # - convert the image to text, i.e. each pixel's color is converted to 0 or F (black/white)
+    # - do actual OCR - known sequences of pixels are replaced with single letter
+    # - replace unrecognized sequences with question mark (the line shall contain one letter only)
+    # - paste the character to form one long line
+    # - fold the line to get back the original terminal
+    # - keep only the first lines
+    xx_do_ocr_prepare "$1" \
+        | sed -f "$XX_MY_HOME/ocr.sed" \
+        | sed '/../s#.*#?#' \
+        | paste -sd '' \
+        | fold -w "$column_count" \
+        | head -n "$row_count"
 }
 
 xx_do_screenshot() {
@@ -357,7 +373,7 @@ xx_do_screenshot() {
         done
         
         if [ -n "$4" ]; then
-            xx_do_ocr "$3" | paste -sd '' | fold -w 80 >"$4"
+            xx_do_ocr "$3" >"$4"
             if $XX_DUMP_TERMINAL; then
                 local print_it=false
                 if [ -e "$4.previous" ]; then
