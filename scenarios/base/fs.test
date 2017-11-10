@@ -34,7 +34,9 @@ xx_cmd \
 
 
 # Start the FAT file server
-xx_cmd "fat" \
+# No longer needed as all FS servers are started to
+# allow FS probing
+false && xx_cmd "fat" \
     assert="Accepting connections" \
     error="Failed to start FAT service." \
     timeout=20
@@ -45,7 +47,6 @@ xx_cmd "mkdir /tmp/mnt" timeout=20
 # Mount the filesystem.
 # Error in this command results in the word 'Unable' to appear on the screen.
 xx_cmd "mount fat /tmp/mnt fbd0" die_on="Unable"
-xx_die_on "Unable"
 
 # Copy the file to the mounted filesystem.
 xx_cmd "cp demo.txt /tmp/mnt" error="Copying demo.txt failed"
@@ -57,11 +58,14 @@ xx_cls
 xx_cmd "ls /tmp/mnt" assert="demo.txt"
 
 
-# Remount the image and check the file is still there (cls is needed again).
-xx_cmd "umount /tmp/mnt"
-xx_sleep 3
-xx_cmd "mount fat /tmp/mnt fbd0" die_on="Unable"
+# Unmount the image, check the file is not there
 xx_cls
+xx_cmd "umount /tmp/mnt"
+xx_cmd "ls /tmp/mnt" die_on="demo.txt" error="demo.txt is still there."
+
+# Remount the image and check the file is still there (cls is needed again).
+xx_cls
+xx_cmd "mount fat /tmp/mnt fbd0" die_on="Unable"
 xx_cmd "ls /tmp/mnt" assert="demo.txt" error="demo.txt disappeared from the FAT image."
 
 
