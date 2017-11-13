@@ -1,0 +1,6 @@
+# Python cache
+__pycache__
+# Default output directories
+out
+tmp
+tmp-vm
