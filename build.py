@@ -46,15 +46,15 @@ def create_checkout_task(name, url):
     if url.startswith("wip://"):
         return RsyncCheckoutTask(name, url[6:])
     else:
-        return BzrCheckoutTask(name, url)
+        return GitCheckoutTask(name, url)
 
 # Command-line options
 args = argparse.ArgumentParser(description='HelenOS integration build')
-args.add_argument('--helenos-repository', default='bzr://helenos.org/mainline', dest='helenos_repository',
+args.add_argument('--helenos-repository', default='https://github.com/HelenOS/helenos.git', dest='helenos_repository',
     metavar='PATH',
     help='HelenOS repository path'
 )
-args.add_argument('--coastline-repository', default='bzr://helenos.org/coastline', dest='coastline_repository',
+args.add_argument('--coastline-repository', default='https://github.com/HelenOS/harbours.git', dest='coastline_repository',
     metavar='PATH',
     help='Coastline repository path'
 )

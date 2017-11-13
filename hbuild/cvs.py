@@ -57,6 +57,17 @@ class BzrCheckoutTask(CvsCheckoutTask):
         if res['failed']:
             raise Exception('Bazaar checkout of %s failed.' % self.url)
 
+class GitCheckoutTask(CvsCheckoutTask):
+    def __init__(self, name, url):
+        self.name = name
+        self.url = url
+        CvsCheckoutTask.__init__(self, repository=url)
+
+    def do_checkout(self, target_directory):
+        res = self.ctl.run_command(['git', 'clone', '--quiet', self.url, target_directory ])
+        if res['failed']:
+            raise Exception('Git clone of %s failed.' % self.url)
+
 class RsyncCheckoutTask(CvsCheckoutTask):
     def __init__(self, name, base):
         self.name = name
