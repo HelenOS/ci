@@ -39,6 +39,7 @@ from hbuild.cvs import *
 from hbuild.builders.helenos import *
 from hbuild.builders.coastline import *
 from hbuild.builders.tests import *
+from hbuild.gendoc import BrowsableSourcesViaGnuGlobalTask
 from hbuild.web import *
 from hbuild.output import ConsolePrinter
 
@@ -148,6 +149,13 @@ scheduler.submit("Checking-out HelenOS",
 scheduler.submit("Checking-out Coastline",
     "coastline-checkout",
     create_checkout_task("coastline", config.coastline_repository))
+
+#
+# Build browsable sources
+scheduler.submit("Browsable sources",
+    "helenos-browsable-sources",
+    BrowsableSourcesViaGnuGlobalTask(),
+    ["helenos-checkout"])
 
 #
 # HelenOS (mainline): get list of profiles (i.e. supported architectures

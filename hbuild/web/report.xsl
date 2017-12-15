@@ -285,6 +285,25 @@
                 </tr>
             </thead>
             <tbody>
+                <xsl:if test="browsable-sources-global">
+                    <tr class="result-{browsable-sources-global/@result}">
+                        <td>
+                            <xsl:text disable-output-escaping="yes"><![CDATA[&mdash;]]></xsl:text>
+                        </td>
+                        <td>
+                            <xsl:apply-templates select="browsable-sources-global" mode="yes-no" />
+                        </td>
+                        <td>
+                            <xsl:apply-templates select="browsable-sources-global" mode="download" />
+                        </td>
+                        <td>
+                            <xsl:apply-templates select="browsable-sources-global" mode="log-link" />
+                        </td>
+                        <td>
+                            <xsl:apply-templates select="browsable-sources-global" mode="duration" />
+                        </td>
+                    </tr>
+                </xsl:if>
                 <xsl:for-each select="helenos-build">
                     <xsl:sort select="@arch" />
                     <tr class="result-{@result}">
