@@ -203,6 +203,18 @@ class TaskController:
         
         return target
     
+    def move_dir_to_downloadable(self, title, download_name, current_dirname):
+        self.dprint("Downloadable `%s' at %s", title, download_name)
+        self.files.append({
+            'filename' : download_name,
+            'title' : title
+        })
+        
+        target = self.get_artefact_absolute_path(download_name, True)
+        shutil.move(current_dirname, target)
+        
+        return target
+    
     def open_downloadable_file(self, download_name, mode):
         return open(self.get_artefact_absolute_path(download_name, True), mode)
     
