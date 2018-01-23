@@ -64,7 +64,7 @@ class GitCheckoutTask(CvsCheckoutTask):
         CvsCheckoutTask.__init__(self, repository=url)
 
     def do_checkout(self, target_directory):
-        res = self.ctl.run_command(['git', 'clone', '--quiet', self.url, target_directory ])
+        res = self.ctl.run_command(['git', 'clone', '--quiet', '--depth', '5', self.url, target_directory ])
         if res['failed']:
             raise Exception('Git clone of %s failed.' % self.url)
 
