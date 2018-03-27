@@ -37,22 +37,6 @@ def sorted_dir(root):
     list.sort()
     return list
 
-def create_hsct_conf(dir, profile, repo_dir, archive_format, sources = None):
-    with open(dir + '/hsct.conf', 'w') as f:
-        if profile == 'mips32/malta-be':
-            profile = 'mips32eb/malta-be'
-        
-        profile_parts = ( profile + '/').split('/')
-        
-        f.write("root = %s\n" % repo_dir)
-        f.write("arch = %s\n" % profile_parts[0])
-        f.write("machine = %s\n" % profile_parts[1])
-        f.write("parallel = 1\n")
-        f.write("archive_format = %s\n" % archive_format)
-        if not sources is None:
-            f.write("sources = %s\n" % sources)
-
-
 class CoastlineGetHarboursTask(Task):
     def __init__(self, harbour_filter):
         self.harbour_filter = harbour_filter
@@ -157,7 +141,6 @@ class CoastlineScheduleFetchesTask(Task):
         coastline_root = self.ctl.make_temp_dir('repo/coastline')
 
         mirror = self.ctl.make_temp_dir('mirror')
-        create_hsct_conf(mirror, 'mirror', 'not-really-needed', '')
 
         tasks = {}
         for h in harbours:
@@ -181,17 +164,8 @@ class CoastlinePrebuildTask(Task):
         root = self.ctl.make_temp_dir('repo/coastline')
         
         my_dir = self.ctl.make_temp_dir('build/%s/coast' % self.build_dir_basename)
-        create_hsct_conf(my_dir, self.profile,
-            self.ctl.make_temp_dir('build/%s/helenos' % self.build_dir_basename),
-            self.archive_format,
-            self.ctl.make_temp_dir('mirror/sources'))
-        
-        self.ctl.run_command([ root + '/hsct.sh', 'update' ], cwd=my_dir)
-        
-        create_hsct_conf(my_dir, self.profile,
-            self.ctl.make_temp_dir('build/%s/helenos-nonexistent' % self.build_dir_basename),
-            self.archive_format,
-            self.ctl.make_temp_dir('mirror/sources'))
+        hsrootdir = self.ctl.make_temp_dir('build/%s/helenos' % self.build_dir_basename)
+        self.ctl.run_command([ root + '/hsct.sh', 'init', hsrootdir ], cwd=my_dir)
         
         return {
             'dir': my_dir
