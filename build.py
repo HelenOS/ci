@@ -106,6 +106,10 @@ args.add_argument('--archive-format', default='tar.xz', dest='archive_format',
     metavar='FORMAT',
     help='Format of the archives (tar.gz or tar.xz).'
 )
+args.add_argument('--no-source-browser', default=True, dest='code_browser',
+    action='store_false',
+    help='Do not generate source code browser.'
+)
 args.add_argument('--jobs', default=multiprocessing.cpu_count(), dest='jobs',
     type=int,
     metavar='COUNT',
@@ -152,10 +156,11 @@ scheduler.submit("Checking-out Coastline",
 
 #
 # Build browsable sources
-scheduler.submit("Browsable sources",
-    "helenos-browsable-sources",
-    BrowsableSourcesViaGnuGlobalTask(),
-    ["helenos-checkout"])
+if config.code_browser:
+    scheduler.submit("Browsable sources",
+        "helenos-browsable-sources",
+        BrowsableSourcesViaGnuGlobalTask(),
+        ["helenos-checkout"])
 
 #
 # HelenOS (mainline): get list of profiles (i.e. supported architectures
