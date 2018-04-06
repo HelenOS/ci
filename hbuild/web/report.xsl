@@ -272,7 +272,7 @@
             </xsl:otherwise>
         </xsl:choose>
         
-        <xsl:if test="helenos-build or browsable-sources-global">
+        <xsl:if test="helenos-build or browsable-sources-global or style-check">
         <h3 id="helenos">HelenOS <xsl:copy-of select="$LINK_TO_TOP" /></h3>
         <table>
             <thead>
@@ -304,6 +304,26 @@
                         </td>
                     </tr>
                     <xsl:apply-templates select="browsable-sources-global" mode="log-dump" />
+                </xsl:if>
+                <xsl:if test="sycek-style-check">
+                    <tr class="result-{sycek-style-check/@result}">
+                        <td>
+                            <i>Sycek C style check</i>
+                        </td>
+                        <td>
+                            <xsl:apply-templates select="sycek-style-check" mode="yes-no" />
+                        </td>
+                        <td>
+                            <xsl:apply-templates select="sycek-style-check" mode="download" />
+                        </td>
+                        <td>
+                            <xsl:apply-templates select="sycek-style-check" mode="log-link" />
+                        </td>
+                        <td>
+                            <xsl:apply-templates select="sycek-style-check" mode="duration" />
+                        </td>
+                    </tr>
+                    <xsl:apply-templates select="sycek-style-check" mode="log-dump" />
                 </xsl:if>
                 <xsl:for-each select="helenos-build">
                     <xsl:sort select="@arch" />

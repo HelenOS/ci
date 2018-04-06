@@ -40,6 +40,7 @@ from hbuild.builders.helenos import *
 from hbuild.builders.coastline import *
 from hbuild.builders.tests import *
 from hbuild.gendoc import BrowsableSourcesViaGnuGlobalTask
+from hbuild.checkers.sycek import SycekBuildTask, SycekCheckTask
 from hbuild.web import *
 from hbuild.output import ConsolePrinter
 
@@ -110,6 +111,10 @@ args.add_argument('--no-source-browser', default=True, dest='code_browser',
     action='store_false',
     help='Do not generate source code browser.'
 )
+args.add_argument('--no-style-check', default=True, dest='style_check',
+    action='store_false',
+    help='Do not check C style.'
+)
 args.add_argument('--jobs', default=multiprocessing.cpu_count(), dest='jobs',
     type=int,
     metavar='COUNT',
@@ -161,6 +166,19 @@ if config.code_browser:
         "helenos-browsable-sources",
         BrowsableSourcesViaGnuGlobalTask(),
         ["helenos-checkout"])
+
+#
+# C style check
+if config.style_check:
+    scheduler.submit("Build Sycek C style checker",
+        "sycek-build",
+        SycekBuildTask(),
+        [])
+
+    scheduler.submit("Check C style with Sycek",
+        "helenos-sycek-check",
+        SycekCheckTask(),
+        ["helenos-checkout", "sycek-build"])
 
 #
 # HelenOS (mainline): get list of profiles (i.e. supported architectures
