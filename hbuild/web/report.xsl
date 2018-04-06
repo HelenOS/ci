@@ -272,7 +272,7 @@
             </xsl:otherwise>
         </xsl:choose>
         
-        <xsl:if test="helenos-build">
+        <xsl:if test="helenos-build or browsable-sources-global">
         <h3 id="helenos">HelenOS <xsl:copy-of select="$LINK_TO_TOP" /></h3>
         <table>
             <thead>
@@ -288,7 +288,7 @@
                 <xsl:if test="browsable-sources-global">
                     <tr class="result-{browsable-sources-global/@result}">
                         <td>
-                            <xsl:text disable-output-escaping="yes"><![CDATA[&mdash;]]></xsl:text>
+                            <i>Source code browser</i>
                         </td>
                         <td>
                             <xsl:apply-templates select="browsable-sources-global" mode="yes-no" />
@@ -303,6 +303,7 @@
                             <xsl:apply-templates select="browsable-sources-global" mode="duration" />
                         </td>
                     </tr>
+                    <xsl:apply-templates select="browsable-sources-global" mode="log-dump" />
                 </xsl:if>
                 <xsl:for-each select="helenos-build">
                     <xsl:sort select="@arch" />
