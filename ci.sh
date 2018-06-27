@@ -140,6 +140,16 @@ xsltproc \
     "$CI_HOME/hbuild/web/rss.xsl" "$WEB_DIR/report.xml" \
     >"$CI_WEB_ROOT/rss.xml"
 
+# Recreate diff RSS
+KEPT_REPORTS=""
+for ID in $KEPT_BUILDS; do
+    KEPT_REPORTS="$KEPT_REPORTS $CI_WEB_ROOT/build-$ID/report.xml"
+done
+xsltproc \
+    --stringparam PREVIOUS_REPORTS "$KEPT_REPORTS"
+    "$CI_HOME/hbuild/web/diff-rss.xsl" "$WEB_DIR/report.xml" \
+    >"$CI_WEB_ROOT/diff-rss.xml"
+
 # Remove older builds
 for i in `list_build_numbers "$CI_WEB_ROOT" | tail -n +$(( $CI_HISTORY_LENGTH + 1 ))`; do
     rm -rf "$CI_WEB_ROOT/build-$i"
