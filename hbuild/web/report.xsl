@@ -93,7 +93,8 @@
         <div class="quick-link-group">
         <h3>Miscellaneous</h3>
         <ul>
-        	<li><a href="#matrix">Summary matrix</a></li>
+            <li><a href="#buildinfo">Build details</a></li>
+            <li><a href="#matrix">Summary matrix</a></li>
             <li><a href="#failures">List of failed tasks</a></li>
             <xsl:if test="helenos-build">
                 <li><a href="#helenos">HelenOS</a></li>
@@ -142,6 +143,41 @@
         
         </div>
         
+        <h2 id="buildinfo">Build details<xsl:copy-of select="$LINK_TO_TOP" /></h2>
+        <table style="width: 60%">
+            <thead>
+                <tr>
+                    <th width="50%">Key</th>
+                    <th width="50%">Value</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr class="result-ok">
+                    <td>Build number</td>
+                    <td><xsl:value-of select="/build/@number" /></td>
+                </tr>
+                <tr class="result-ok">
+                    <td>Build start time</td>
+                    <td><xsl:value-of select="buildinfo/@started" /></td>
+                </tr>
+                <tr class="result-ok">
+                    <td>Build duration</td>
+                    <td><xsl:apply-templates select="buildinfo" mode="duration" /></td>
+                </tr>
+                <tr class="result-ok">
+                    <td>Build parallelism level</td>
+                    <td><xsl:value-of select="buildinfo/@parallelism" /></td>
+                </tr>
+                <xsl:for-each select="checkout[@alias!='']">
+                    <xsl:sort select="alias" />
+                    <tr class="result-ok">
+                        <td>Repository <i><xsl:value-of select="@alias" /></i> version</td>
+                        <td><xsl:value-of select="@revision" /></td>
+                    </tr>
+                </xsl:for-each>
+            </tbody>
+        </table>
+
         <h2 id="matrix">Summary matrix<xsl:copy-of select="$LINK_TO_TOP" /></h2>
         <table class="matrix">
             <thead>
