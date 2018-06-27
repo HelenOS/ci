@@ -50,7 +50,7 @@ class BzrCheckoutTask(CvsCheckoutTask):
     def __init__(self, name, url):
         self.name = name
         self.url = url
-        CvsCheckoutTask.__init__(self, repository=url)
+        CvsCheckoutTask.__init__(self, repository=url, alias=name)
 
     def do_checkout(self, target_directory):
         res = self.ctl.run_command(['bzr', 'branch', self.url, target_directory ])
@@ -61,18 +61,21 @@ class GitCheckoutTask(CvsCheckoutTask):
     def __init__(self, name, url):
         self.name = name
         self.url = url
-        CvsCheckoutTask.__init__(self, repository=url)
+        CvsCheckoutTask.__init__(self, repository=url, alias=name)
 
     def do_checkout(self, target_directory):
         res = self.ctl.run_command(['git', 'clone', '--quiet', '--depth', '5', self.url, target_directory ])
         if res['failed']:
             raise Exception('Git clone of %s failed.' % self.url)
+        hash = self.ctl.run_command(['git', 'rev-parse', 'HEAD'], cwd=target_directory, needs_output=True)
+        if not hash['failed']:
+            self.report['attrs']['revision'] = hash['stdout'].strip()
 
 class RsyncCheckoutTask(CvsCheckoutTask):
     def __init__(self, name, base):
         self.name = name
         self.base = base
-        CvsCheckoutTask.__init__(self, repository=base)
+        CvsCheckoutTask.__init__(self, repository=base, alias=name)
 
     def do_checkout(self, target_directory):
         res = self.ctl.run_command(['rsync', '-a', self.base + '/', target_directory ])
