@@ -1,0 +1,10 @@
+meta:
+  name: "tester printf"
+  harbours: []
+
+tasks:
+  - boot
+  - command:
+      args: "tester print2"
+      assert:  "Test passed"
+      negassert: "Test failed"
