@@ -208,6 +208,7 @@ class QemuVMController(VMController):
         if not self.booted:
             return
         self._send_command('quit')
+        VMController.terminate(self)
 
     def type(self, what):
         translations = {
