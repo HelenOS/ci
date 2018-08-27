@@ -62,6 +62,13 @@ class QemuVMController(VMController):
             '-m', '256',
             '-usb',
         ],
+        'ppc32': [
+            'qemu-system-ppc',
+            '-usb',
+            '-boot', 'd',
+            '-cdrom', '{BOOT}',
+            '-m', '256',
+        ],
     }
 
     def __init__(self, arch, name, boot_image):
