@@ -101,6 +101,9 @@ class ScenarioTaskCommand(ScenarioTask):
             args = { 'args': args}
         self.check_required_argument(args, 'args')
         self.command = args['args']
+        self.ignore_abort = False
+        if 'ignoreabort' in args:
+            self.ignore_abort = args['ignoreabort']
         self.args = args
 
     def _grep(self, text, lines):
@@ -144,8 +147,9 @@ class ScenarioTaskCommand(ScenarioTask):
             lines = self.machine.vterm
             self.logger.debug("Read lines {}".format(lines))
             self.machine.vterm = []
-            if self._grep('Cannot spawn', lines) or self._grep('Command failed', lines):
-                raise Exception('Failed to run command')
+            if not self.ignore_abort:
+                if self._grep('Cannot spawn', lines) or self._grep('Command failed', lines):
+                    raise Exception('Failed to run command')
             if 'negassert' in self.args:
                 if self._grep(self.args['negassert'], lines):
                     raise Exception('Found forbidden text {} ...'.format(self.args['negassert']))
