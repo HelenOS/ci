@@ -38,6 +38,11 @@ from htest.vm.controller import VMManager
 from htest.vm.qemu import QemuVMController
 from htest.tasks import *
 
+controllers_by_architecture = {
+    'amd64': QemuVMController,
+    'ia32': QemuVMController,
+}
+
 args = argparse.ArgumentParser(description='HelenOS VM tests')
 args.add_argument('--scenario',
     metavar='FILENAME.yml',
@@ -48,7 +53,7 @@ args.add_argument('--scenario',
 args.add_argument('--arch',
     metavar='ARCHITECTURE',
     dest='architecture',
-    default='amd64',
+    required=True,
     help='Emulated architecture identification.'
 )
 args.add_argument('--image',
@@ -91,9 +96,11 @@ with open(config.scenario, 'r') as f:
         logger.error(ex)
         sys.exit(1)
 
-logger.debug(scenario)
 
-vmm = VMManager(QemuVMController, config.architecture, config.boot_image)
+if not config.architecture in controllers_by_architecture:
+    logger.error("Unsupported architecture {}.".format(config.architecture))
+
+vmm = VMManager(controllers_by_architecture[config.architecture], config.architecture, config.boot_image)
 
 scenario_tasks = []
 for t in scenario['tasks']:

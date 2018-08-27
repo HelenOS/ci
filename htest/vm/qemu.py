@@ -41,6 +41,9 @@ class QemuVMController(VMController):
     """
 
     def __init__(self, arch, name, boot_image):
+        if not arch in ['ia32', 'amd64']:
+            raise Exception("Unsupported architecture {}.".format(arch))
+
         VMController.__init__(self, 'QEMU-' + arch)
         self.arch = arch
         self.booted = False
@@ -78,7 +81,14 @@ class QemuVMController(VMController):
 
     def boot(self, **kwargs):
         self.monitor_file = self.get_temp('monitor')
-        cmd = [ 'qemu-system-x86_64' , '-usb', '-m', '256' ]
+        cmd = []
+        cmd.append({
+            'amd64': 'qemu-system-x86_64',
+            'ia32': 'qemu-system-i386',
+        }[self.arch])
+        cmd.append('-usb')
+        cmd.append('-m')
+        cmd.append('256')
         cmd.append('-enable-kvm')
         cmd.append('-cdrom')
         cmd.append(self.boot_image)
