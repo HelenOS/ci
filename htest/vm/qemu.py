@@ -125,6 +125,9 @@ class QemuVMController(VMController):
             elif opt == '{MEMORY}':
                 opt = '{}'.format(self.memory)
             cmd.append(opt)
+        if self.is_headless:
+            cmd.append('-display')
+            cmd.append('none')
         cmd.append('-monitor')
         cmd.append('unix:{},server,nowait'.format(self.monitor_file))
         for opt in self.extra_options:

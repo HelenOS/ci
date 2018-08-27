@@ -39,6 +39,12 @@ from htest.vm.qemu import QemuVMController
 from htest.tasks import *
 
 args = argparse.ArgumentParser(description='HelenOS VM tests')
+args.add_argument('--headless',
+    dest='headless',
+    default=False,
+    action='store_true',
+    help='Do not show any VM windows.'
+)
 args.add_argument('--scenario',
     metavar='FILENAME.yml',
     dest='scenario',
@@ -125,7 +131,7 @@ if controller is None:
     logger.error("Unsupported architecture {}.".format(config.architecture))
     sys.exit(1)
 
-vmm = VMManager(controller, config.architecture, config.boot_image, config.memory, config.pass_thru_options)
+vmm = VMManager(controller, config.architecture, config.boot_image, config.memory, config.headless, config.pass_thru_options)
 
 scenario_tasks = []
 for t in scenario['tasks']:
