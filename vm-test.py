@@ -51,6 +51,14 @@ args.add_argument('--arch',
     required=True,
     help='Emulated architecture identification.'
 )
+args.add_argument('--memory',
+    metavar='MB',
+    dest='memory',
+    type=int,
+    required=False,
+    default=256,
+    help='Amount of memory for the virtual machine.'
+)
 args.add_argument('--image',
     metavar='FILENAME',
     dest='boot_image',
@@ -97,6 +105,10 @@ with open(config.scenario, 'r') as f:
         logger.error(ex)
         sys.exit(1)
 
+if config.memory < 8:
+    logger.error("Specify at least 8MB of memory.")
+    sys.exit(1)
+
 controller = None
 for ctl in [ QemuVMController ]:
     if ctl.is_supported(config.architecture):
@@ -106,7 +118,7 @@ if controller is None:
     logger.error("Unsupported architecture {}.".format(config.architecture))
     sys.exit(1)
 
-vmm = VMManager(controller, config.architecture, config.boot_image)
+vmm = VMManager(controller, config.architecture, config.boot_image, config.memory)
 
 scenario_tasks = []
 for t in scenario['tasks']:

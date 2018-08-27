@@ -46,7 +46,7 @@ class QemuVMController(VMController):
         'amd64': [
             'qemu-system-x86_64',
             '-cdrom', '{BOOT}',
-            '-m', '256',
+            '-m', '{MEMORY}',
             '-usb',
         ],
         'arm32/integratorcp': [
@@ -54,12 +54,12 @@ class QemuVMController(VMController):
             '-M', 'integratorcp',
             '-usb',
             '-kernel', '{BOOT}',
-            '-m', '256',
+            '-m', '{MEMORY}',
         ],
         'ia32': [
             'qemu-system-i386',
             '-cdrom', '{BOOT}',
-            '-m', '256',
+            '-m', '{MEMORY}',
             '-usb',
         ],
         'ppc32': [
@@ -67,7 +67,7 @@ class QemuVMController(VMController):
             '-usb',
             '-boot', 'd',
             '-cdrom', '{BOOT}',
-            '-m', '256',
+            '-m', '{MEMORY}',
         ],
     }
 
@@ -122,6 +122,8 @@ class QemuVMController(VMController):
         for opt in QemuVMController.config[self.arch]:
             if opt == '{BOOT}':
                 opt = self.boot_image
+            elif opt == '{MEMORY}':
+                opt = '{}'.format(self.memory)
             cmd.append(opt)
         cmd.append('-monitor')
         cmd.append('unix:{},server,nowait'.format(self.monitor_file))
