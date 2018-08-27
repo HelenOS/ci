@@ -54,7 +54,7 @@ class GetTestListTask(Task):
                     tests.append(t)
             elif os.path.isfile(path):
                 xxx, ext = os.path.splitext(path)
-                if ext == '.test':
+                if ext == '.yml':
                     tests.append(base + name)
         
         return tests
@@ -109,7 +109,7 @@ class ScheduleTestsTask(Task):
         for scenario in scenarios:
             for profile in profiles:
                 scenario_filename = os.path.join(scenario_base_path, scenario)
-                dep_harbours =  self.get_needed_harbours(scenario_filename)
+                dep_harbours = self.get_needed_harbours(scenario_filename)
                 if len(dep_harbours) > 0:
                     helenos_task = self.extra_builds.build(profile, dep_harbours)
                     if helenos_task is None:
@@ -121,7 +121,7 @@ class ScheduleTestsTask(Task):
                 self.scheduler.submit("Testing {} on {}".format(scenario, profile),
                     'test-{}-{}'.format(profile.replace('/', '-'), scenario_flat),
                     TestRunTask(profile, scenario, scenario_filename,
-                        os.path.abspath(os.path.join(self.base_path, 'test-in-vm.sh')), self.extra_tester_options),
+                        os.path.abspath(os.path.join(self.base_path, 'vm-test.py')), self.extra_tester_options),
                     [ helenos_task ],
                     [ 'qemu-kvm' ]
                 )
@@ -185,23 +185,22 @@ class ScheduleTestsTask(Task):
         return True
     
     def get_needed_harbours(self, scenario_filename):
-        res = []
         with open(scenario_filename) as f:
-            lines = f.read().split('\n')
-            for l in lines:
-                m = ScheduleTestsTask.NEEDED_HARBOUR_PATTERN.match(l)
-                if m is None:
-                    continue
-                g = m.group('HARBOURS')
-                harbours = re.findall(ScheduleTestsTask.SPLIT_HARBOURS_PATTERN, g)
-                for h in harbours:
-                    res.append(h)
-        res.sort()
-        return res
+            try:
+                import yaml
+                scenario = yaml.load(f)
+                if ('meta' in scenario) and ('harbours' in scenario['meta']):
+                    res = scenario['meta']['harbours']
+                    res.sort()
+                    return res
+            except Exception as ex:
+                pass
+        return []
 
 class TestRunTask(Task):
     def __init__(self, profile, scenario_name, scenario_full_filename, test_script_filename, extra_test_script_options):
         self.profile = profile
+        self.scenario_name = scenario_name
         self.scenario = scenario_full_filename
         self.tester = os.path.abspath(test_script_filename)
         self.tester_options = extra_test_script_options
@@ -209,21 +208,32 @@ class TestRunTask(Task):
 
     def run(self):
         os_image = self.ctl.get_dependency_data('image')
+        my_dir = self.ctl.get_dependency_data('dir')
         if os_image is None:
             return False
+        # FIXME: this is probably not the best location for the files
+        vterm_dump = os.path.join(my_dir, 'dump.txt')
+        screenshot = os.path.join(my_dir, 'screenshot.png')
         command = [
             self.tester,
-            '--headless',
-            '--fail-fast',
             '--debug',
-            '--dump-terminal',
-            '--activity',
+            '--headless',
             '--arch={}'.format(self.profile),
             '--image={}'.format(os_image),
-            '--no-kvm',
+            '--vterm-dump={}'.format(vterm_dump),
+            '--last-screenshot={}'.format(screenshot),
         ]
         for i in self.tester_options:
             command.append(i)
+        command.append('--scenario')
         command.append(self.scenario)
         res = self.ctl.run_command(command)
-        return res
+        if res['failed']:
+            return False
+
+        profile_flat = self.profile.replace("/", "-")
+        scenario_flat = self.scenario_name.replace('.yml', '').replace('/', '-').replace('.', '-')
+        self.ctl.add_downloadable_file("Last screen", '{}/test-{}-screen.png'.format(profile_flat, scenario_flat), screenshot)
+        self.ctl.add_downloadable_file("Terminal dump", '{}/test-{}-vterm.txt'.format(profile_flat, scenario_flat), vterm_dump)
+
+        return True
