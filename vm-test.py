@@ -65,6 +65,13 @@ args.add_argument('--image',
     required=True,
     help='HelenOS boot image (e.g. ISO file).'
 )
+args.add_argument('--pass',
+    metavar='OPTION',
+    dest='pass_thru_options',
+    default=[],
+    action='append',
+    help='Extra options to pass through to the emulator'
+)
 args.add_argument('--vterm-dump',
     metavar='FILENAME.txt',
     dest='vterm_dump',
@@ -118,7 +125,7 @@ if controller is None:
     logger.error("Unsupported architecture {}.".format(config.architecture))
     sys.exit(1)
 
-vmm = VMManager(controller, config.architecture, config.boot_image, config.memory)
+vmm = VMManager(controller, config.architecture, config.boot_image, config.memory, config.pass_thru_options)
 
 scenario_tasks = []
 for t in scenario['tasks']:

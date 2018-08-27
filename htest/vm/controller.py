@@ -36,11 +36,12 @@ class VMManager:
     Keeps track of running virtual machines.
     """
 
-    def __init__(self, controller, architecture, boot_image, memory_amount):
+    def __init__(self, controller, architecture, boot_image, memory_amount, extra_opts):
         self.controller_class = controller
         self.architecture = architecture
         self.boot_image = boot_image
         self.memory_amount = memory_amount
+        self.extra_options = extra_opts
         self.instances = {}
         self.last = None
 
@@ -49,6 +50,7 @@ class VMManager:
             raise Exception("Duplicate machine name {}.".format(name))
         self.instances[name] = self.controller_class(self.architecture, name, self.boot_image)
         self.instances[name].memory = self.memory_amount
+        self.instances[name].extra_options = self.extra_options
         self.last = name
         return self.instances[name]
 
@@ -97,6 +99,8 @@ class VMController:
         self.vterm = []
         # Amount of memory (MB) (patched by VMM manager)
         self.memory = 0
+        # Extra command-line options (patched by VMM manager)
+        self.extra_options = []
         pass
 
     def is_supported(self, arch):

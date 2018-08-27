@@ -127,6 +127,8 @@ class QemuVMController(VMController):
             cmd.append(opt)
         cmd.append('-monitor')
         cmd.append('unix:{},server,nowait'.format(self.monitor_file))
+        for opt in self.extra_options:
+            cmd.append(opt)
         self.logger.debug("Starting QEMU: {}".format(format_command(cmd)))
 
         self.proc = subprocess.Popen(cmd)
