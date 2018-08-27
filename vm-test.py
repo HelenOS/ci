@@ -57,6 +57,12 @@ args.add_argument('--image',
     required=True,
     help='HelenOS boot image (e.g. ISO file).'
 )
+args.add_argument('--vterm-dump',
+    metavar='FILENAME.txt',
+    dest='vterm_dump',
+    default=None,
+    help='Where to store full vterm dump.'
+)
 args.add_argument('--debug',
     dest='debug',
     default=False,
@@ -124,4 +130,5 @@ try:
 except Exception as ex:
     print(ex)
 
-vmm.terminate()
+vmm.terminate(config.vterm_dump)
+

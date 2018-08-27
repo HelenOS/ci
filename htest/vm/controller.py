@@ -60,9 +60,14 @@ class VMManager:
         else:
             return None
 
-    def terminate(self):
+    def terminate(self, vterm_dump_filename):
         for i in self.instances:
             self.instances[i].terminate()
+        if vterm_dump_filename is not None:
+            with open(vterm_dump_filename, 'w') as f:
+                for i in self.instances:
+                    lines = '\n'.join(self.instances[i].full_vterm)
+                    print(lines, file=f)
 
 
 class VMController:
