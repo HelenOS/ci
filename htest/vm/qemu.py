@@ -32,6 +32,8 @@ import subprocess
 import socket
 import logging
 
+from PIL import Image
+
 from htest.utils import retries, format_command, format_command_pipe
 from htest.vm.controller import VMController
 
@@ -50,6 +52,12 @@ class QemuVMController(VMController):
         self.name = name
         self.boot_image = boot_image
         self.logger = logging.getLogger('qemu-{}'.format(name))
+
+    def _get_image_dimensions(self, filename):
+        im = Image.open(filename)
+        width, height = im.size
+        im.close()
+        return ( width, height )
 
     def _check_is_up(self):
         if not self.booted:
@@ -156,11 +164,14 @@ class QemuVMController(VMController):
             except:
                 pass
 
+        width, height = self._get_image_dimensions(screenshot_term)
+        cols = width // 8
+        rows = height // 16
         self._run_pipe([
             [
                 'convert',
                 screenshot_term,
-                '-crop', '640x480',
+                '-crop', '{}x{}'.format(cols * 8, rows * 16),
                 '+repage',
                 '-crop', '8x16',
                 '+repage',
@@ -197,12 +208,12 @@ class QemuVMController(VMController):
             ],
             [
                 'fold',
-                '-w', '80',
+                '-w', '{}'.format(cols),
             ],
             [ 'tee', self.get_temp('4.txt') ],
             [
                 'head',
-                '-n', '30',
+                '-n', '{}'.format(rows),
             ],
             [
                 'tee',
