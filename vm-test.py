@@ -156,11 +156,13 @@ for t in scenario['tasks']:
     task_inst.set_machine(machine)
     scenario_tasks.append(task_inst)
 
+exit_code = 0
 try:
     for t in scenario_tasks:
         t.run()
 except Exception as ex:
     print(ex)
+    exit_code = 1
 
 vmm.terminate(config.vterm_dump, config.last_screenshot)
-
+sys.exit(exit_code)
