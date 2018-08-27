@@ -86,6 +86,12 @@ class VMController:
         self.vterm = []
         pass
 
+    def is_supported(self, arch):
+        """
+        Tells whether this controller supports given architecture.
+        """
+        return False
+
     def boot(self, **kwargs):
         """
         Bring the machine up.

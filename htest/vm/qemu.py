@@ -42,16 +42,38 @@ class QemuVMController(VMController):
     QEMU VM controller.
     """
 
-    def __init__(self, arch, name, boot_image):
-        if not arch in ['ia32', 'amd64']:
-            raise Exception("Unsupported architecture {}.".format(arch))
+    config = {
+        'amd64': [
+            'qemu-system-x86_64',
+            '-cdrom', '{BOOT}',
+            '-m', '256',
+            '-usb',
+        ],
+        'arm32/integratorcp': [
+            'qemu-system-arm',
+            '-M', 'integratorcp',
+            '-usb',
+            '-kernel', '{BOOT}',
+            '-m', '256',
+        ],
+        'ia32': [
+            'qemu-system-i386',
+            '-cdrom', '{BOOT}',
+            '-m', '256',
+            '-usb',
+        ],
+    }
 
+    def __init__(self, arch, name, boot_image):
         VMController.__init__(self, 'QEMU-' + arch)
         self.arch = arch
         self.booted = False
         self.name = name
         self.boot_image = boot_image
         self.logger = logging.getLogger('qemu-{}'.format(name))
+
+    def is_supported(arch):
+        return arch in QemuVMController.config
 
     def _get_image_dimensions(self, filename):
         im = Image.open(filename)
@@ -90,17 +112,10 @@ class QemuVMController(VMController):
     def boot(self, **kwargs):
         self.monitor_file = self.get_temp('monitor')
         cmd = []
-        cmd.append({
-            'amd64': 'qemu-system-x86_64',
-            'ia32': 'qemu-system-i386',
-        }[self.arch])
-        cmd.append('-usb')
-        cmd.append('-m')
-        cmd.append('256')
-        cmd.append('-enable-kvm')
-        cmd.append('-cdrom')
-        cmd.append(self.boot_image)
-        #cmd.append('-daemonize')
+        for opt in QemuVMController.config[self.arch]:
+            if opt == '{BOOT}':
+                opt = self.boot_image
+            cmd.append(opt)
         cmd.append('-monitor')
         cmd.append('unix:{},server,nowait'.format(self.monitor_file))
         self.logger.debug("Starting QEMU: {}".format(format_command(cmd)))
