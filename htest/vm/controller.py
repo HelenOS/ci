@@ -29,6 +29,7 @@
 #
 
 import os
+import subprocess
 
 class VMManager:
     """
@@ -60,7 +61,7 @@ class VMManager:
         else:
             return None
 
-    def terminate(self, vterm_dump_filename):
+    def terminate(self, vterm_dump_filename, last_screenshot_filename):
         for i in self.instances:
             self.instances[i].terminate()
         if vterm_dump_filename is not None:
@@ -68,7 +69,14 @@ class VMManager:
                 for i in self.instances:
                     lines = '\n'.join(self.instances[i].full_vterm)
                     print(lines, file=f)
-
+        if last_screenshot_filename is not None:
+            for i in self.instances:
+                filename = self.instances[i].screenshot_filename
+                if filename is not None:
+                    proc = subprocess.Popen(['convert', filename, last_screenshot_filename])
+                    proc.wait()
+                    if proc.returncode != 0:
+                        raise Exception("Saving screenshot failed.")
 
 class VMController:
     """
@@ -79,6 +87,7 @@ class VMController:
         self.provider_name = provider
         # Patched by VMManager
         self.name = 'XXX'
+        self.screenshot_filename = None
         # All lines seen in the terminal
         # (do not reset unless you know what you are doing).
         self.full_vterm = []

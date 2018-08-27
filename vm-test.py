@@ -63,6 +63,12 @@ args.add_argument('--vterm-dump',
     default=None,
     help='Where to store full vterm dump.'
 )
+args.add_argument('--last-screenshot',
+    metavar='FILENAME.png',
+    dest='last_screenshot',
+    default=None,
+    help='Where to store last screenshot.'
+)
 args.add_argument('--debug',
     dest='debug',
     default=False,
@@ -137,5 +143,5 @@ try:
 except Exception as ex:
     print(ex)
 
-vmm.terminate(config.vterm_dump)
+vmm.terminate(config.vterm_dump, config.last_screenshot)
 

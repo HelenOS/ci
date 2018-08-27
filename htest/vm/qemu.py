@@ -242,6 +242,9 @@ class QemuVMController(VMController):
                 screenshot_text,
             ]
         ])
+
+        self.screenshot_filename = screenshot_full
+
         with open(screenshot_text, 'r') as f:
             lines = [ l.strip('\n') for l in f.readlines() ]
             self.logger.debug("Captured text:")
