@@ -700,7 +700,9 @@
 <xsl:template match="*" mode="download">
     <xsl:for-each select="file">
         <a href="{@filename}"><xsl:value-of select="@title" /></a>
-        <xsl:if test="not(last())">, </xsl:if>
+        <xsl:if test="not(position() = last())">
+            <xsl:text>, </xsl:text>
+        </xsl:if>
     </xsl:for-each>
     <xsl:if test="not(file)">
         <xsl:text disable-output-escaping="yes"><![CDATA[&mdash;]]></xsl:text>
