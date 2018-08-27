@@ -74,6 +74,11 @@ class VMController:
         self.provider_name = provider
         # Patched by VMManager
         self.name = 'XXX'
+        # All lines seen in the terminal
+        # (do not reset unless you know what you are doing).
+        self.full_vterm = []
+        # Used to keep track of new-lines
+        self.vterm = []
         pass
 
     def boot(self, **kwargs):
@@ -95,11 +100,62 @@ class VMController:
         print("type('{}') @ {}".format(what, self.provider_name))
         pass
 
+    def same_vterm_tail(self, lines):
+        lines_count = len(lines)
+        for i in range(-1, -lines_count - 1, -1):
+            if i != -1:
+                if lines[i] != self.full_vterm[i]:
+                    return False
+            else:
+                a = lines[-1].replace("_", " ").strip()
+                b = self.full_vterm[-1].replace("_", " ").strip()
+                if not a.startswith(b):
+                    return False
+        return True
+
     def capture_vterm(self):
         """
-        Get contents of current terminal window.
+        Capture contents of current terminal window and updates self.vterm
         """
-        return self.capture_vterm_impl()
+
+        # Read everything from the terminal and get rid of completely empty
+        # lines (for first commands when the screen is empty).
+        lines = self.capture_vterm_impl()
+        lines = [l.strip() for l in lines]
+        while (len(lines) > 0) and (lines[-1].strip() == ""):
+            lines = lines[0:-1]
+        if (len(lines) == 0):
+            return
+
+        # When this is the very first screen, we simply copy it.
+        if len(self.full_vterm) == 0:
+            for l in lines:
+                self.full_vterm.append(l)
+                self.vterm.append(l)
+        else:
+            # Otherwise, we find whether there is some overlap, i.e. whether
+            # we are capturing a rolling screen.
+            lines_count = len(lines)
+            same_lines = 0
+            for i in range(lines_count, 0, -1):
+                if self.same_vterm_tail(lines[0:i]):
+                    same_lines = i
+                    break
+            # If there is no overlap, we might have missed some lines.
+            if same_lines == 0:
+                self.full_vterm.append("!!!!!! WARNING: probably missed some lines here !!!!!")
+            else:
+                # Otherwise, update the last line (last capture might have
+                # missed some characters).
+                if len(self.full_vterm) > 0:
+                    self.full_vterm = self.full_vterm[0:-1]
+                if len(self.vterm) > 0:
+                    self.vterm = self.vterm[0:-1]
+                same_lines = same_lines - 1
+            # Add the new lines.
+            for i in range(same_lines, lines_count):
+                self.full_vterm.append(lines[i])
+                self.vterm.append(lines[i])
 
     def capture_vterm_impl(self):
         """

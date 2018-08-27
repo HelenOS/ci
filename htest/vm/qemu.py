@@ -108,8 +108,9 @@ class QemuVMController(VMController):
 
         uspace_booted = False
         for xxx in retries(timeout=3*60, interval=5, name="vterm", message="Failed to boot into userspace"):
-            lines = self.capture_vterm()
-            for l in lines:
+            self.vterm = []
+            self.capture_vterm()
+            for l in self.vterm:
                 if l.find('to see a few survival tips') != -1:
                     uspace_booted = True
                     break
@@ -117,6 +118,7 @@ class QemuVMController(VMController):
                 break
 
         assert uspace_booted
+        self.full_vterm = self.vterm
 
         self.logger.info("Machine booted into userspace.")
 

@@ -112,11 +112,38 @@ class ScenarioTaskCommand(ScenarioTask):
     def run(self):
         self.logger.info("Typing '{}' into {}.".format(self.command, self.machine.name))
 
+        # Capture the screen before typing the command.
+        self.machine.capture_vterm()
+
         self.machine.type(self.command)
+
+        # Wait until the command is fully displayed on the screen.
+        # That is needed to properly detect the newly displayed lines.
+        # FIXME: this will not work for long commands spanning multiple lines
+        for xxx in retries(timeout=60, interval=2, name="vterm-type", message="Failed to type command"):
+            self.machine.vterm = []
+            self.machine.capture_vterm()
+            lines = self.machine.vterm
+
+            if len(lines) > 0:
+                line = lines[0].strip()
+                if line.endswith("_"):
+                    line = line[0:-1]
+                if line.endswith(self.command.strip()):
+                    break
+
+        self.machine.vterm = []
         self.machine.type('\n')
 
+        # Read output of the command.
+        # We wait until prompt reappears or we find some text that is not
+        # supposed to be there.
         for xxx in retries(timeout=60, interval=2, name="vterm-run", message="Failed to run command"):
-            lines = self.machine.capture_vterm()
+            self.logger.debug("self.vterm = {}".format(self.machine.vterm))
+            self.machine.capture_vterm()
+            lines = self.machine.vterm
+            self.logger.debug("Read lines {}".format(lines))
+            self.machine.vterm = []
             if 'negassert' in self.args:
                 if self._grep(self.args['negassert'], lines):
                     raise Exception('Found forbidden text {} ...'.format(self.args['negassert']))
