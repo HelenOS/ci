@@ -144,14 +144,14 @@ class ScenarioTaskCommand(ScenarioTask):
             lines = self.machine.vterm
             self.logger.debug("Read lines {}".format(lines))
             self.machine.vterm = []
+            if self._grep('Cannot spawn', lines) or self._grep('Command failed', lines):
+                raise Exception('Failed to run command')
             if 'negassert' in self.args:
                 if self._grep(self.args['negassert'], lines):
                     raise Exception('Found forbidden text {} ...'.format(self.args['negassert']))
             if 'assert' in self.args:
                 if self._grep(self.args['assert'], lines):
                     break
-            if self._grep('Cannot spawn', lines) or self._grep('Command failed', lines):
-                raise Exception('Failed to run command')
             if self._grep('# _', lines):
                 if 'assert' in self.args:
                     raise Exception('Missing expected text {} ...'.format(self.args['assert']))
