@@ -27,18 +27,15 @@ tasks:
       negassert: "Unable"
   - name: Copy the file to the mounted filesystem
     command: "cp demo.txt /tmp/mnt"
-  - cls
   - name: Checking file copying actually succeeded
     command:
       args: "ls /tmp/mnt"
       assert: "demo.txt"
-  - cls
   - command: "umount /tmp/mnt"
   - name: Checking demo.txt is not present when unmounted
     command:
       args: "ls /tmp/mnt"
       negassert: "demo.txt"
-  - cls
   - command:
       args: "mount fat /tmp/mnt fbd0"
       negassert: "Unable"
