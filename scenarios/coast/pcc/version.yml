@@ -1,0 +1,10 @@
+meta:
+  name: "pcc --version"
+  harbours:
+     - pcc
+
+tasks:
+  - boot
+  - command:
+      args: "pcc --version"
+      assert:  "pcc 1.0.0 for HelenOS"

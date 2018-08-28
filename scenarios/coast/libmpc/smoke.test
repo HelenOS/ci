@@ -1,9 +1,0 @@
-#!/bin/sh
-
-# @needs libmpc
-
-xx_start_machine
-
-xx_cmd "/tests/libmpc/tswap" timeout=20
-
-xx_stop_machine

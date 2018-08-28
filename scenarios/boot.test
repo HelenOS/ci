@@ -1,5 +1,0 @@
-#!/bin/sh
-
-xx_start_machine
-
-xx_stop_machine

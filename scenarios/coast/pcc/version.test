@@ -1,9 +1,0 @@
-#!/bin/sh
-
-# @needs pcc
-
-xx_start_machine
-
-xx_cmd "pcc --version" assert="pcc 1.0.0 for HelenOS"
-
-xx_stop_machine

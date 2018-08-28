@@ -1,0 +1,9 @@
+meta:
+  name: "libmpc smoke test"
+  harbours:
+     - libmpc
+
+tasks:
+  - boot
+  - command:
+      args: "/tests/libmpc/tswap"

@@ -1,0 +1,12 @@
+meta:
+  name: "Hello from Python"
+  harbours:
+     - python2
+
+tasks:
+  - boot
+  - command:
+      args: "cd /src/python/demo"
+  - command:
+      args: "python hello.py"
+      assert:  "Hello"

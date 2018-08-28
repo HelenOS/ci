@@ -1,9 +1,0 @@
-#!/bin/sh
-
-# @needs libisl
-
-xx_start_machine
-
-xx_cmd 'from /tests/libisl/max.pip | /tests/libisl/isl_pip --format=set --context=gbr -T' timeout=20
-
-xx_stop_machine

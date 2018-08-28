@@ -1,9 +1,0 @@
-#!/bin/sh
-
-# @needs libgmp
-
-xx_start_machine
-
-xx_cmd "/tests/libgmp/t-count_zeros" timeout=20
-
-xx_stop_machine

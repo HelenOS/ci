@@ -1,0 +1,14 @@
+meta:
+  name: "tester malloc"
+  harbours: []
+
+tasks:
+  - boot
+  - command:
+      args: "tester malloc1"
+      assert:  "Test passed"
+      negassert: "Test failed"
+  - command:
+      args: "tester malloc2"
+      assert:  "Test passed"
+      negassert: "Test failed"

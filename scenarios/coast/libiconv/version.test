@@ -1,9 +1,0 @@
-#!/bin/sh
-
-# @needs libiconv
-
-xx_start_machine
-
-xx_cmd "iconv --version" assert="GNU libiconv"
-
-xx_stop_machine
