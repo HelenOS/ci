@@ -32,7 +32,7 @@ import os
 import re
 import fnmatch
 
-from hbuild.scheduler import Task
+from hbuild.scheduler import Task, RunCommandException
 from hbuild.builders.helenos import HelenOSBuildWithHarboursTask
 
 class GetTestListTask(Task):
@@ -227,13 +227,26 @@ class TestRunTask(Task):
             command.append(i)
         command.append('--scenario')
         command.append(self.scenario)
-        res = self.ctl.run_command(command)
-        if res['failed']:
-            return False
+
+        command_exc = None
+
+        try:
+            command_res = self.ctl.run_command(command)
+        except RunCommandException as ex:
+            command_exc = ex
 
         profile_flat = self.profile.replace("/", "-")
         scenario_flat = self.scenario_name.replace('.yml', '').replace('/', '-').replace('.', '-')
-        self.ctl.add_downloadable_file("Last screen", '{}/test-{}-screen.png'.format(profile_flat, scenario_flat), screenshot)
-        self.ctl.add_downloadable_file("Terminal dump", '{}/test-{}-vterm.txt'.format(profile_flat, scenario_flat), vterm_dump)
+        try:
+            self.ctl.add_downloadable_file("Last screen", '{}/test-{}-screen.png'.format(profile_flat, scenario_flat), screenshot)
+        except OSError:
+            pass
+        try:
+            self.ctl.add_downloadable_file("Terminal dump", '{}/test-{}-vterm.txt'.format(profile_flat, scenario_flat), vterm_dump)
+        except OSError:
+            pass
 
-        return True
+        if command_exc is not None:
+            raise command_exc
+
+        return {}
