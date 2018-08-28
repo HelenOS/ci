@@ -75,7 +75,7 @@ class Task:
             self.report['attrs']['duration'] = (end_time - start_time) * 1000
             
             self.report['result'] = 'fail'
-            self.report['files'] = []
+            self.report['files'] = self.ctl.get_files()
             self.ctl.done()
             raise e
     
