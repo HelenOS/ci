@@ -1,0 +1,22 @@
+meta:
+  name: "ping"
+  harbours: []
+
+tasks:
+  - boot
+  - command:
+      args: "inet list-addr"
+      assert:  "10.0.2.15"
+  - command:
+      args: "ping 10.0.2.2"
+      assert: "Received ICMP echo reply"
+
+# TODO: expand this test-case to do ping between two HelenOS hosts.
+# It would be best if that would be possible in host userspace
+# without root privileges.
+# Following commands
+# (guest 1) -netdev socket,id=n1,listen=:8010 -device e1000,netdev=n1,mac=3c:08:51:05:24:8a
+# (guest 2) -netdev socket,id=n1,connect=127.0.0.1:8010 -device e1000,netdev=n1,mac=3c:08:51:05:24:8b
+# launches two guests that - with IP addresses in the same subnet - see 
+# ach other. However, it seems that connecting third guess is impossible
+# hence this is not a general solution.
