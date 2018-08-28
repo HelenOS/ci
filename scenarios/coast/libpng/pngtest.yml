@@ -1,0 +1,10 @@
+meta:
+  name: "pngtest"
+  harbours:
+     - libpng
+
+tasks:
+  - boot
+  - command:
+      args: "pngtest"
+      assert:  "libpng passes test"

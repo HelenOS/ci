@@ -1,0 +1,10 @@
+meta:
+  name: "gcc --version"
+  harbours:
+     - gcc
+
+tasks:
+  - boot
+  - command:
+      args: "gcc --version"
+      assert:  "GCC"

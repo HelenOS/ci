@@ -1,0 +1,46 @@
+meta:
+  name: "Base file system test"
+  harbours: []
+
+tasks:
+  - boot
+  - command: "mkfile --size 2m /tmp/img"
+  - name: Checking image file has the right size.
+    command:
+      args: "ls /tmp"
+      assert:  "2097152"
+  - name: Starting file_bd
+    command:
+      args: "file_bd /tmp/img fbd0"
+      assert: "Accepting connections"
+      negassert: "Failed to start block device layer."
+  - name: Creating filesystem
+    command:
+      args: "mkfat --type 12 fbd0"
+      assert: "Success"
+      negassert: "Failed to create FAT file system"
+  - name: Creating a dedicated mount-point
+    command: "mkdir /tmp/mnt" 
+  - name: Mounting the file system
+    command:
+      args: "mount fat /tmp/mnt fbd0"
+      negassert: "Unable"
+  - name: Copy the file to the mounted filesystem
+    command: "cp demo.txt /tmp/mnt"
+  - name: Checking file copying actually succeeded
+    command:
+      args: "ls /tmp/mnt"
+      assert: "demo.txt"
+  - command: "umount /tmp/mnt"
+  - name: Checking demo.txt is not present when unmounted
+    command:
+      args: "ls /tmp/mnt"
+      negassert: "demo.txt"
+  - command:
+      args: "mount fat /tmp/mnt fbd0"
+      negassert: "Unable"
+  - name: Checking the file is still there after re-mounting
+    command:
+      args: "ls /tmp/mnt"
+      assert: "demo.txt"
+

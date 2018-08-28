@@ -1,0 +1,10 @@
+meta:
+  name: "iconv --version"
+  harbours:
+     - libiconv
+
+tasks:
+  - boot
+  - command:
+      args: "iconv --version"
+      assert:  "GNU libiconv"

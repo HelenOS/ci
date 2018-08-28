@@ -1,0 +1,15 @@
+meta:
+  name: "Hello from PCC"
+  harbours:
+     - pcc
+     - binutils
+
+tasks:
+  - boot
+  - command:
+      args: "cd /src/c/demos/hello"
+  - command:
+      args: "pcc hello.c"
+  - command:
+      args: "./a.out"
+      assert: "hello!"

@@ -1,0 +1,10 @@
+meta:
+  name: "python --version"
+  harbours:
+     - python2
+
+tasks:
+  - boot
+  - command:
+      args: "python --version"
+      assert:  "Python 2.7"

@@ -1,9 +1,0 @@
-#!/bin/sh
-
-# @needs libmpfr
-
-xx_start_machine
-
-xx_cmd "/tests/libmpfr/tsum" timeout=20
-
-xx_stop_machine

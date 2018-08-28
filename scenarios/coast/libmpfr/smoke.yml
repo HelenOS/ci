@@ -1,0 +1,9 @@
+meta:
+  name: "libmpfr smoke test"
+  harbours:
+     - libmpfr
+
+tasks:
+  - boot
+  - command:
+      args: "/tests/libmpfr/tsum"

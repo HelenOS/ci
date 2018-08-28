@@ -1,0 +1,11 @@
+meta:
+  name: "minigzip --help"
+  harbours:
+     - zlib
+
+tasks:
+  - boot
+  - command:
+      args: "minigzip --help"
+      assert:  "ENOENT"
+      ignoreabort: True

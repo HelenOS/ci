@@ -102,6 +102,7 @@ class HelenOSBuildWithHarboursTask(Task):
         
         ret = {
             'image': None,
+            'dir': my_dir,
         }
         
         image_name = self.ctl.get_dependency_data('built-image')

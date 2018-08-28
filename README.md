@@ -38,24 +38,67 @@ Tests
 The tests are executed in QEMU and it is possible to type text
 into console and assert for command output.
 
-See scripts in `scenarios/` directory for examples or the `test-in-vm.sh`
+See scripts in `scenarios/` directory for examples or the `test-in-vm.py`
 script to learn about internals.
 
+```text
+usage: test-in-vm.py [-h] [--headless] [--scenario FILENAME.yml] --arch
+                     ARCHITECTURE [--memory MB] --image FILENAME
+                     [--pass OPTION] [--vterm-dump FILENAME.txt]
+                     [--last-screenshot FILENAME.png] [--debug]
+
+Testing of HelenOS in VM
+
+optional arguments:
+  -h, --help            show this help message and exit
+  --headless            Do not show any VM windows.
+  --scenario FILENAME.yml
+                        Scenario file
+  --arch ARCHITECTURE   Emulated architecture identification.
+  --memory MB           Amount of memory for the virtual machine.
+  --image FILENAME      HelenOS boot image (e.g. ISO file).
+  --pass OPTION         Extra options to pass through to the emulator
+  --vterm-dump FILENAME.txt
+                        Where to store full vterm dump.
+  --last-screenshot FILENAME.png
+                        Where to store last screenshot.
+  --debug               Print debugging messages
+
+Typical invocation will use the following arguments:
+  --image helenos.iso
+  --scenario scenario.yml
+  --arch amd64               # ia32, ppc32 etc.
+  --vterm-dump dump.txt      # all text from main vterm
+  --last-screenshot shot.png # last VM screen
+```
 
 Simple test running malloc and checking its output looks like this:
 
-```
-xx_start_machine
-xx_cmd "tester malloc1" assert="Test passed" timeout=120 die_on="demo"
-xx_stop_machine
+```yml
+meta:
+  name: "tester malloc"
+  harbours: []
+
+tasks:
+  - boot
+  - command:
+      args: "tester malloc1"
+      assert:  "Test passed"
+      negassert: "Test failed"
 ```
 
 
-Test checking that we are able to launch gcc (needs special image):
+Test checking that we are able to launch GCC (needs special image):
 
-```
-# @needs gcc
-xx_start_machine
-xx_cmd "gcc" assert="no input files" timeout=20
-xx_stop_machine
+```yml
+meta:
+  name: "gcc --version"
+  harbours:
+     - gcc
+
+tasks:
+  - boot
+  - command:
+      args: "gcc --version"
+      assert:  "GCC"
 ```

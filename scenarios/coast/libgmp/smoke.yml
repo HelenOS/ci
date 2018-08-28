@@ -1,0 +1,9 @@
+meta:
+  name: "libgmp smoke test"
+  harbours:
+     - libgmp
+
+tasks:
+  - boot
+  - command:
+      args: "/tests/libgmp/t-count_zeros"
