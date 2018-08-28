@@ -38,24 +38,37 @@ Tests
 The tests are executed in QEMU and it is possible to type text
 into console and assert for command output.
 
-See scripts in `scenarios/` directory for examples or the `test-in-vm.sh`
+See scripts in `scenarios/` directory for examples or the `test-in-vm.py`
 script to learn about internals.
 
 
 Simple test running malloc and checking its output looks like this:
 
-```
-xx_start_machine
-xx_cmd "tester malloc1" assert="Test passed" timeout=120 die_on="demo"
-xx_stop_machine
+```yml
+meta:
+  name: "tester malloc"
+  harbours: []
+
+tasks:
+  - boot
+  - command:
+      args: "tester malloc1"
+      assert:  "Test passed"
+      negassert: "Test failed"
 ```
 
 
-Test checking that we are able to launch gcc (needs special image):
+Test checking that we are able to launch GCC (needs special image):
 
-```
-# @needs gcc
-xx_start_machine
-xx_cmd "gcc" assert="no input files" timeout=20
-xx_stop_machine
+```yml
+meta:
+  name: "gcc --version"
+  harbours:
+     - gcc
+
+tasks:
+  - boot
+  - command:
+      args: "gcc --version"
+      assert:  "GCC"
 ```
