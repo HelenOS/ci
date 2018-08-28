@@ -133,9 +133,9 @@
         <h3>Testing scenarios</h3>
         <ul>
             <xsl:for-each select="*[@scenario and count(. | key('by-scenario', @scenario)[parent::build = $BUILD][1]) = 1]">
-                <xsl:sort select="@scenario" />
+                <xsl:sort select="@description" />
                 <xsl:variable name="SCENARIO" select="@scenario" />
-                <li><a href="#scenario-{$SCENARIO}"><xsl:value-of select="$SCENARIO" /></a></li>
+                <li><a href="#scenario-{$SCENARIO}"><xsl:value-of select="@description" /></a></li>
             </xsl:for-each>
         </ul>
         </div>
@@ -230,12 +230,12 @@
                     </tr>
                 </xsl:for-each>
                 <xsl:for-each select="*[@scenario and count(. | key('by-scenario', @scenario)[parent::build = $BUILD][1]) = 1]">
-                    <xsl:sort select="@scenario" />
+                    <xsl:sort select="@description" />
                     <xsl:variable name="SCENARIO" select="@scenario" />
                     <tr>
                         <th style="white-space: nowrap;">
                             <a title="{$SCENARIO}" href="#scenario-{$SCENARIO}">
-                                <xsl:value-of select="$SCENARIO" />
+                                <xsl:value-of select="@description" />
                             </a>
                         </th>
                         <xsl:for-each select="//*[@arch and count(. | key('by-arch', @arch)[parent::build = $BUILD][1]) = 1]">
@@ -298,7 +298,7 @@
                             <xsl:apply-templates select="." mode="html-failed-task-table-row" />
                         </xsl:for-each>
                         <xsl:for-each select="test[@result='fail']">
-                            <xsl:sort select="@scenario" />
+                            <xsl:sort select="@description" />
                             <xsl:sort select="@arch" />
                             <xsl:apply-templates select="." mode="html-failed-task-table-row" />
                         </xsl:for-each>
@@ -458,7 +458,7 @@
                 </xsl:for-each>
                 <xsl:for-each select="$BUILD/test[@arch=$ARCH]">
                     <tr class="result-{@result}">
-                        <td><xsl:value-of select="@scenario" /></td>
+                        <td><xsl:value-of select="@description" /></td>
                         <td>
                             <xsl:apply-templates select="." mode="yes-no" />
                         </td>
@@ -541,7 +541,7 @@
         <xsl:for-each select="$BUILD/*[@scenario and count(. | key('by-scenario', @scenario)[parent::build = $BUILD][1]) = 1]">
             <xsl:sort select="@scenario" />
             <xsl:variable name="SCENARIO" select="@scenario" />
-            <h3 id="scenario-{$SCENARIO}"><xsl:value-of select="$SCENARIO" /><xsl:copy-of select="$LINK_TO_TOP" /></h3>
+            <h3 id="scenario-{$SCENARIO}"><xsl:value-of select="@description" /><xsl:copy-of select="$LINK_TO_TOP" /></h3>
             <table>
                 <thead>
                 <tr>
@@ -762,7 +762,7 @@
 
 <xsl:template match="test" mode="html-failed-task-table-row-inner">
     <td>Test in VM</td>
-    <td><xsl:value-of select="@scenario" /></td>
+    <td><xsl:value-of select="@description" /></td>
     <td><xsl:value-of select="@arch" /></td>
 </xsl:template>
 

@@ -204,7 +204,22 @@ class TestRunTask(Task):
         self.scenario = scenario_full_filename
         self.tester = os.path.abspath(test_script_filename)
         self.tester_options = extra_test_script_options
-        Task.__init__(self, 'test', arch=profile, scenario=scenario_name)
+        Task.__init__(self, 'test',
+            arch=profile,
+            scenario=scenario_name,
+            description=self.get_scenario_description(scenario_full_filename)
+        )
+
+    def get_scenario_description(self, filename):
+        with open(filename) as f:
+            try:
+                import yaml
+                scenario = yaml.load(f)
+                if ('meta' in scenario) and ('name' in scenario['meta']):
+                    return '{}'.format(scenario['meta']['name'])
+            except Exception as ex:
+                pass
+        return ""
 
     def run(self):
         os_image = self.ctl.get_dependency_data('image')
