@@ -38,7 +38,18 @@ from htest.vm.controller import VMManager
 from htest.vm.qemu import QemuVMController
 from htest.tasks import *
 
-args = argparse.ArgumentParser(description='HelenOS VM tests')
+args = argparse.ArgumentParser(
+    description='Testing of HelenOS in VM',
+    formatter_class=argparse.RawDescriptionHelpFormatter,
+    epilog="""
+Typical invocation will use the following arguments:
+  --image helenos.iso
+  --scenario scenario.yml
+  --arch amd64               # ia32, ppc32 etc.
+  --vterm-dump dump.txt      # all text from main vterm
+  --last-screenshot shot.png # last VM screen
+"""
+)
 args.add_argument('--headless',
     dest='headless',
     default=False,
