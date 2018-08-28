@@ -146,7 +146,7 @@ for ID in $KEPT_BUILDS; do
     KEPT_REPORTS="$KEPT_REPORTS $CI_WEB_ROOT/build-$ID/report.xml"
 done
 xsltproc \
-    --stringparam PREVIOUS_REPORTS "$KEPT_REPORTS"
+    --stringparam PREVIOUS_REPORTS "$KEPT_REPORTS" \
     "$CI_HOME/hbuild/web/diff-rss.xsl" "$WEB_DIR/report.xml" \
     >"$CI_WEB_ROOT/diff-rss.xml"
 
