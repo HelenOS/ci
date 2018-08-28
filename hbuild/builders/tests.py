@@ -121,7 +121,7 @@ class ScheduleTestsTask(Task):
                 self.scheduler.submit("Testing {} on {}".format(scenario, profile),
                     'test-{}-{}'.format(profile.replace('/', '-'), scenario_flat),
                     TestRunTask(profile, scenario, scenario_filename,
-                        os.path.abspath(os.path.join(self.base_path, 'vm-test.py')), self.extra_tester_options),
+                        os.path.abspath(os.path.join(self.base_path, 'test-in-vm.py')), self.extra_tester_options),
                     [ helenos_task ],
                     [ 'qemu-kvm' ]
                 )
