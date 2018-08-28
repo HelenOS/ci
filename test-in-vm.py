@@ -59,7 +59,7 @@ args.add_argument('--headless',
 args.add_argument('--scenario',
     metavar='FILENAME.yml',
     dest='scenario',
-    default='scenarios/base/pcut.yml',
+    required=True,
     help='Scenario file'
 )
 args.add_argument('--arch',
