@@ -125,63 +125,7 @@ class ScheduleTestsTask(Task):
                     [ helenos_task ],
                     [ 'qemu-kvm' ]
                 )
-        
-        
-#         scenario_dependencies = {}
-#         for s in scenarios:
-#             scenario_dependencies[s] = {}
-#             harbours =
-#             for p in profiles:
-#                 scenario_dependencies[s][p] = [
-#                     self.extra_builds.build(p, harbours)
-#                 ]
-#                 
-#         
-#         needed_harbours = {}
-#         for s in scenarios:
-#            
-#             needed_harbours[ s ] = {
-#                 'harbours': harbours,
-#                 'hash': '-'.join(harbours)
-#             }
-#         
-#         self.ctl.dprint('Harbour tasks: {}'.format(harbour_tasks))
-#         self.ctl.dprint('Needed harbours: {}'.format(needed_harbours))
-#         
-#         for p in profiles:
-#             special_images_tasks = {}
-#             for s in scenarios:
-#                 self.ctl.dprint('{}/{}: special-tasks: {}'.format(p, s, special_images_tasks))
-#                 s_flat = s.replace('/', '-').replace('.', '-')
-#                 deps = [ helenos_build_tasks[p] ]
-#                 if len(needed_harbours[s]['harbours']) > 0:
-#                     if not needed_harbours[s]['hash'] in special_images_tasks:
-#                         extra_deps = [ helenos_build_tasks[p] ]
-#                         continue_outer = False
-#                         for h in needed_harbours[s]['harbours']:
-#                             if h not in harbour_tasks[p]:
-#                                 continue_outer = True
-#                                 break
-#                             else:
-#                                 extra_deps.append(harbour_tasks[p][h])
-#                         if continue_outer:
-#                             continue
-#                         task_name = 'extra-{}-with-{}'.format(p.replace('/', '-'), needed_harbours[s]['hash'])
-#                         self.scheduler.submit("Special build of {} with {}".format(p, ','.join(needed_harbours[s]['harbours'])),
-#                             task_name,
-#                             HelenOSBuildWithHarboursTask(p, needed_harbours[s]['harbours']),
-#                             extra_deps,
-#                             [ 'extras-{}'.format(p) ]
-#                         )
-#                         special_images_tasks[ needed_harbours[s]['hash'] ] = task_name
-#                     deps.append(special_images_tasks[ needed_harbours[s]['hash'] ])
-#                 self.scheduler.submit("Testing {} on {}".format(s, p),
-#                     'test-{}-{}'.format(p.replace('/', '-'), s_flat),
-#                     TestRunTask(p, s, os.path.join(scenario_base_path, s)),
-#                     deps,
-#                     [ 'qemu-kvm' ]
-#                 )
-#         
+
         return True
     
     def get_needed_harbours(self, scenario_filename):
