@@ -168,7 +168,13 @@ class TaskController:
     def recursive_copy(self, src_dir, dest_dir):
         os.makedirs(dest_dir, exist_ok=True)
         self.run_command([ 'rsync', '-a', src_dir + '/', dest_dir ])
-    
+
+    def remove_silently(self, path):
+        try:
+            os.remove(path)
+        except OSError as ex:
+            pass
+
     def set_log_file(self, log_filename):
         # TODO: open the log lazily
         # TODO: propagate the information to XML report

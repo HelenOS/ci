@@ -170,9 +170,16 @@ class TestRunTask(Task):
         my_dir = self.ctl.get_dependency_data('dir')
         if os_image is None:
             return False
+
         # FIXME: this is probably not the best location for the files
         vterm_dump = os.path.join(my_dir, 'dump.txt')
         screenshot = os.path.join(my_dir, 'screenshot.png')
+
+        # Remove existing files to prevent propagation of
+        # old screenshots to newer tasks
+        self.ctl.remove_silently(vterm_dump)
+        self.ctl.remove_silently(screenshot)
+
         command = [
             self.tester,
             '--debug',
