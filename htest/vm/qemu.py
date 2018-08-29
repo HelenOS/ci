@@ -31,6 +31,8 @@
 import subprocess
 import socket
 import logging
+import os
+import sys
 
 from PIL import Image
 
@@ -70,6 +72,11 @@ class QemuVMController(VMController):
             '-m', '{MEMORY}',
         ],
     }
+
+    ocr_sed = os.path.join(
+        os.path.dirname(os.path.realpath(sys.argv[0])),
+        'ocr.sed'
+    )
 
     def __init__(self, arch, name, boot_image):
         VMController.__init__(self, 'QEMU-' + arch)
@@ -224,7 +231,7 @@ class QemuVMController(VMController):
             [ 'tee', self.get_temp('2.txt') ],
             [
                 'sed',
-                '-f', 'ocr.sed',
+                '-f', QemuVMController.ocr_sed,
             ],
             [
                 'sed',
