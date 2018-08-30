@@ -85,3 +85,32 @@ class BrowsableSourcesViaGnuGlobalTask(Task):
         }
         
         return ret
+
+class DoxygenTask(Task):
+    def __init__(self):
+        Task.__init__(self, 'doxygen')
+
+    def run(self):
+        root_dir = self.ctl.get_dependency_data('dir')
+        my_dir = self.ctl.make_temp_dir('build/doxygen')
+        self.ctl.recursive_copy(root_dir, my_dir)
+
+        res = self.ctl.run_command([
+            'make',
+            '-C', 'doxygen'
+        ], cwd=my_dir)
+
+        if res['failed']:
+            return False
+
+        self.ctl.move_dir_to_downloadable(
+            'Doxygen documentation',
+            'doxygen',
+            os.path.join(my_dir, 'doxygen', 'html')
+        )
+
+        ret = {
+            'dir': my_dir,
+        }
+
+        return ret

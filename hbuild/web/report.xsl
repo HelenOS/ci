@@ -308,7 +308,7 @@
             </xsl:otherwise>
         </xsl:choose>
         
-        <xsl:if test="helenos-build or browsable-sources-global or style-check">
+        <xsl:if test="helenos-build or browsable-sources-global or doxygen or style-check">
         <h3 id="helenos">HelenOS <xsl:copy-of select="$LINK_TO_TOP" /></h3>
         <table>
             <thead>
@@ -321,6 +321,26 @@
                 </tr>
             </thead>
             <tbody>
+                <xsl:if test="doxygen">
+                    <tr class="result-{doxygen/@result}">
+                        <td>
+                            <i>Doxygen documentation</i>
+                        </td>
+                        <td>
+                            <xsl:apply-templates select="doxygen" mode="yes-no" />
+                        </td>
+                        <td>
+                            <xsl:apply-templates select="doxygen" mode="download" />
+                        </td>
+                        <td>
+                            <xsl:apply-templates select="doxygen" mode="log-link" />
+                        </td>
+                        <td>
+                            <xsl:apply-templates select="doxygen" mode="duration" />
+                        </td>
+                    </tr>
+                    <xsl:apply-templates select="doxygen" mode="log-dump" />
+                </xsl:if>
                 <xsl:if test="browsable-sources-global">
                     <tr class="result-{browsable-sources-global/@result}">
                         <td>

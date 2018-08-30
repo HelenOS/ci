@@ -39,7 +39,7 @@ from hbuild.cvs import *
 from hbuild.builders.helenos import *
 from hbuild.builders.coastline import *
 from hbuild.builders.tests import *
-from hbuild.gendoc import BrowsableSourcesViaGnuGlobalTask
+from hbuild.gendoc import BrowsableSourcesViaGnuGlobalTask, DoxygenTask
 from hbuild.checkers.sycek import SycekBuildTask, SycekCheckTask
 from hbuild.web import *
 from hbuild.output import ConsolePrinter
@@ -115,6 +115,10 @@ args.add_argument('--no-style-check', default=True, dest='style_check',
     action='store_false',
     help='Do not check C style.'
 )
+args.add_argument('--no-doxygen', default=True, dest='doxygen',
+    action='store_false',
+    help='Do not run Doxygen.'
+)
 args.add_argument('--jobs', default=multiprocessing.cpu_count(), dest='jobs',
     type=int,
     metavar='COUNT',
@@ -165,6 +169,12 @@ if config.code_browser:
     scheduler.submit("Browsable sources",
         "helenos-browsable-sources",
         BrowsableSourcesViaGnuGlobalTask(),
+        ["helenos-checkout"])
+
+if config.doxygen:
+    scheduler.submit("Generate Doxygen documentation",
+        "helenos-doxygen",
+        DoxygenTask(),
         ["helenos-checkout"])
 
 #
