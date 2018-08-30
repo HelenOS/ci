@@ -84,7 +84,6 @@ class QemuVMController(VMController):
         self.booted = False
         self.name = name
         self.boot_image = boot_image
-        self.logger = logging.getLogger('qemu-{}'.format(name))
 
     def is_supported(arch):
         return arch in QemuVMController.config

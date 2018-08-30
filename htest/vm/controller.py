@@ -30,6 +30,7 @@
 
 import os
 import subprocess
+import logging
 
 class VMManager:
     """
@@ -91,6 +92,7 @@ class VMController:
 
     def __init__(self, provider):
         self.provider_name = provider
+        self.logger = logging.getLogger(provider)
         # Patched by VMManager
         self.name = 'XXX'
         self.screenshot_filename = None
@@ -154,6 +156,7 @@ class VMController:
         # lines (for first commands when the screen is empty).
         lines = self.capture_vterm_impl()
         lines = [l.strip() for l in lines]
+        self.logger.debug("Captured lines: {}".format(lines))
         while (len(lines) > 0) and (lines[-1].strip() == ""):
             lines = lines[0:-1]
         if (len(lines) == 0):
