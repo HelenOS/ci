@@ -80,9 +80,6 @@ class GetTestListTask(Task):
 
 
 class ScheduleTestsTask(Task):
-    NEEDED_HARBOUR_PATTERN = re.compile('^[ ]*#[ ]*@needs[ ]+(?P<HARBOURS>.*)$')
-    SPLIT_HARBOURS_PATTERN = re.compile('\w+')
-    
     def __init__(self, scheduler, extra_builds, base_path, extra_tester_options):
         self.scheduler = scheduler
         self.testable_profiles = [ 'ia32', 'amd64', 'arm32/integratorcp', 'ppc32' ]
