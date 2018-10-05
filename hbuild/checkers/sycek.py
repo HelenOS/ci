@@ -28,8 +28,9 @@
 # THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #
 
-from hbuild.scheduler import Task
+from hbuild.scheduler import Task, RunCommandException, TaskException
 import os
+import re
 
 class SycekBuildTask(Task):
     def __init__(self):
@@ -66,19 +67,24 @@ class SycekBuildTask(Task):
 class SycekCheckTask(Task):
     def __init__(self):
         Task.__init__(self, 'sycek-style-check')
+        self.ignored_files_patterns = [
+             re.compile('^uspace/lib/pcut/')
+        ]
 
     def check_one_file(self, sycek, root_dir, filename):
-        res = self.ctl.run_command([ sycek, filename ], cwd=root_dir, needs_output=True)
-        if res['failed']:
-            self.ctl.append_line_to_log_file("%s: unexpected error, see above." % filename)
-            return ( False, 0 )
+        try:
+            res = self.ctl.run_command([ sycek, filename ], cwd=root_dir, needs_output=True)
+        except RunCommandException as ex:
+            res = {
+                'output': ex.output
+            }
         issues_count = len(res['output'])
         if issues_count == 0:
             self.ctl.append_line_to_log_file("%s: no error." % filename)
             return ( True, 0 )
         else:
             self.ctl.append_line_to_log_file("%s: there were issues, see above." % filename)
-            return ( True, issues_count )
+            return ( False, issues_count )
 
     def run(self):
         root_dir = self.ctl.get_dependency_data('dir')
@@ -103,16 +109,26 @@ class SycekCheckTask(Task):
                     if not is_c_file:
                         continue
 
-                    res = self.check_one_file(sycek_bin, root_dir, os.path.join(path_prefix, filename))
-                    all_okay = all_okay and res[0]
+                    filename_with_path = os.path.join(path_prefix, filename)
+
+                    skip = False
+                    for pat in self.ignored_files_patterns:
+                        if pat.match(filename_with_path) is not None:
+                            skip = True
+                            break
+                    if skip:
+                        continue
+
+                    ( okay, issues_count ) = self.check_one_file(sycek_bin, root_dir, filename_with_path)
+                    all_okay = all_okay and okay
 
                     files_total = files_total + 1
-                    if res[0]:
-                        if res[1] == 0:
+                    if okay:
+                        if issues_count == 0:
                             files_okay = files_okay + 1
                         else:
                             files_failures = files_failures + 1
-                        issues_total = issues_total + res[1]
+                        issues_total = issues_total + issues_count
                     else:
                         files_errors = files_errors + 1
 
@@ -124,4 +140,7 @@ class SycekCheckTask(Task):
         self.ctl.append_line_to_log_file("Files with errors: %d" % files_errors)
         self.ctl.append_line_to_log_file("Total issues found: %d" % issues_total)
 
-        return all_okay
+        if all_okay:
+            return True
+        else:
+            raise TaskException("Some files has C style issues.")
