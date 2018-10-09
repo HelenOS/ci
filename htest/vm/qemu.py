@@ -279,6 +279,8 @@ class QemuVMController(VMController):
             '/': 'slash',
             '\n': 'ret',
             '_': 'shift-minus',
+            '|': 'shift-backslash',
+            '=': 'equal',
         }
         for letter in what:
             if letter.isupper():
