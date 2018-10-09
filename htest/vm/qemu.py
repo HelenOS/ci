@@ -281,6 +281,8 @@ class QemuVMController(VMController):
             '_': 'shift-minus',
         }
         for letter in what:
+            if letter.isupper():
+                letter = 'shift-' + letter.lower()
             if letter in translations:
                 letter = translations[letter]
             self._send_command('sendkey ' + letter)
