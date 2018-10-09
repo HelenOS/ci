@@ -190,7 +190,7 @@ class TestRunTask(Task):
         ]
         for i in self.tester_options:
             command.append(i)
-        if self.profile in ['ia32', 'amd64']:
+        if self.profile in ['ia32', 'amd64', 'arm32/integratorcp']:
             command.append('--pass=-serial')
             command.append('--pass=file:{}'.format(serial))
         command.append('--scenario')
