@@ -6,4 +6,6 @@ meta:
 tasks:
   - boot
   - command:
-      args: "from /tests/libisl/max.pip | /tests/libisl/isl_pip --format=set --context=gbr -T"
+      args: "cd /tests/libisl"
+  - command:
+      args: "from max.pip | ./isl_pip --format=set --context=gbr -T"
