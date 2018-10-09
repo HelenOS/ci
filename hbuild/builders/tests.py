@@ -171,11 +171,13 @@ class TestRunTask(Task):
         # FIXME: this is probably not the best location for the files
         vterm_dump = os.path.join(my_dir, 'dump.txt')
         screenshot = os.path.join(my_dir, 'screenshot.png')
+        serial = os.path.join(my_dir, 'serial.txt')
 
         # Remove existing files to prevent propagation of
         # old screenshots to newer tasks
         self.ctl.remove_silently(vterm_dump)
         self.ctl.remove_silently(screenshot)
+        self.ctl.remove_silently(serial)
 
         command = [
             self.tester,
@@ -188,6 +190,9 @@ class TestRunTask(Task):
         ]
         for i in self.tester_options:
             command.append(i)
+        if self.profile in ['ia32', 'amd64']:
+            command.append('--pass=-serial')
+            command.append('--pass=file:{}'.format(serial))
         command.append('--scenario')
         command.append(self.scenario)
 
@@ -206,6 +211,10 @@ class TestRunTask(Task):
             pass
         try:
             self.ctl.add_downloadable_file("Terminal dump", '{}/test-{}-vterm.txt'.format(profile_flat, scenario_flat), vterm_dump)
+        except OSError:
+            pass
+        try:
+            self.ctl.add_downloadable_file("Serial dump", '{}/test-{}-serial.txt'.format(profile_flat, scenario_flat), serial)
         except OSError:
             pass
 
