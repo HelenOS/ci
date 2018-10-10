@@ -196,29 +196,30 @@ class TaskController:
         
         return os.path.abspath(dname + name)
 
-    # TODO: propagate title + download_name to the report
     def add_downloadable_file(self, title, download_name, current_filename):
         self.dprint("Downloadable `%s' at %s", title, download_name)
+
+        target = self.get_artefact_absolute_path(download_name, True)
+        shutil.copy(current_filename, target)
+
         self.files.append({
             'filename' : download_name,
             'title' : title
         })
-        
-        target = self.get_artefact_absolute_path(download_name, True)
-        shutil.copy(current_filename, target)
-        
+
         return target
     
     def move_dir_to_downloadable(self, title, download_name, current_dirname):
         self.dprint("Downloadable `%s' at %s", title, download_name)
+
+        target = self.get_artefact_absolute_path(download_name, True)
+        shutil.move(current_dirname, target)
+
         self.files.append({
             'filename' : download_name,
             'title' : title
         })
-        
-        target = self.get_artefact_absolute_path(download_name, True)
-        shutil.move(current_dirname, target)
-        
+
         return target
     
     def open_downloadable_file(self, download_name, mode):
