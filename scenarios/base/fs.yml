@@ -11,7 +11,7 @@ tasks:
       assert:  "2097152"
   - name: Starting file_bd
     command:
-      args: "file_bd /tmp/img fbd0"
+      args: "bd/file_bd /tmp/img fbd0"
       assert: "Accepting connections"
       negassert: "Failed to start block device layer."
   - name: Creating filesystem
