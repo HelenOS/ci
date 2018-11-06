@@ -1,0 +1,9 @@
+meta:
+  name: "Play demo.wav"
+  harbours: []
+
+tasks:
+  - boot
+  - command:
+      args: "wavplay demo.wav"
+      negassert: "Failed to connect to default target"
