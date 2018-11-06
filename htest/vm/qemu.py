@@ -50,6 +50,7 @@ class QemuVMController(VMController):
             '-cdrom', '{BOOT}',
             '-m', '{MEMORY}',
             '-usb',
+            '-device', 'intel-hda', '-device', 'hda-duplex',
         ],
         'arm32/integratorcp': [
             'qemu-system-arm',
@@ -63,6 +64,7 @@ class QemuVMController(VMController):
             '-cdrom', '{BOOT}',
             '-m', '{MEMORY}',
             '-usb',
+            '-device', 'intel-hda', '-device', 'hda-duplex',
         ],
         'ppc32': [
             'qemu-system-ppc',
