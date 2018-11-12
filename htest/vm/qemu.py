@@ -186,7 +186,7 @@ class QemuVMController(VMController):
 
         self._send_command('screendump ' + screenshot_full)
 
-        for xxx in retries(timeout=5, interval=1, name="scrdump", message="Failed to capture screen"):
+        for xxx in retries(timeout=10, interval=1, name="scrdump", message="Failed to capture screen"):
             try:
                 self._run_command([
                     'convert',
