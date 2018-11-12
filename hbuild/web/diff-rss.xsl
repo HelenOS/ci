@@ -140,9 +140,9 @@
     </xsl:variable>
 
     <xsl:variable name="FIXES_SINCE_LAST_BUILD">
-        <xsl:call-template name="FIND_NEW_FAILURES">
-            <xsl:with-param name="BEFORE" select="$AFTER" />
-            <xsl:with-param name="AFTER" select="$BEFORE" />
+        <xsl:call-template name="FIND_NEW_FIXES">
+            <xsl:with-param name="BEFORE" select="$BEFORE" />
+            <xsl:with-param name="AFTER" select="$AFTER" />
         </xsl:call-template>
     </xsl:variable>
 
@@ -229,12 +229,43 @@
 <xsl:template name="FIND_NEW_FAILURES">
     <xsl:param name="BEFORE" />
     <xsl:param name="AFTER" />
+    <xsl:for-each select="$AFTER/build/*[@result = 'fail']">
+        <xsl:sort />
+        <xsl:variable name="AFTER_LOG" select="./@log" />
+        <xsl:variable name="BEFORE_NODE" select="$BEFORE/build/*[@log=$AFTER_LOG][1]" />
+        <xsl:if test="not($BEFORE_NODE)">
+            <xsl:value-of select="$AFTER_LOG" />
+            <xsl:text> </xsl:text>
+        </xsl:if>
+    </xsl:for-each>
     <xsl:for-each select="$BEFORE/build/*[@result != 'fail']">
         <xsl:sort />
+        <xsl:variable name="BEFORE_RESULT" select="./@result" />
         <xsl:variable name="BEFORE_LOG" select="./@log" />
         <xsl:variable name="AFTER_NODE" select="$AFTER/build/*[@log=$BEFORE_LOG][1]" />
-        <xsl:if test="$AFTER_NODE/@result = 'fail'">
+        <xsl:variable name="AFTER_RESULT" select="$AFTER_NODE/@result" />
+        <xsl:if test="$AFTER_RESULT = 'fail'">
             <xsl:value-of select="$BEFORE_LOG" />
+            <xsl:text> </xsl:text>
+        </xsl:if>
+        <xsl:if test="($AFTER_RESULT = 'skip') and ($BEFORE_RESULT = 'ok')">
+            <xsl:value-of select="$BEFORE_LOG" />
+            <xsl:text> </xsl:text>
+        </xsl:if>
+    </xsl:for-each>
+</xsl:template>
+
+<xsl:template name="FIND_NEW_FIXES">
+    <xsl:param name="BEFORE" />
+    <xsl:param name="AFTER" />
+    <xsl:for-each select="$AFTER/build/*[@result = 'ok']">
+        <xsl:sort />
+        <xsl:variable name="AFTER_RESULT" select="./@result" />
+        <xsl:variable name="AFTER_LOG" select="./@log" />
+        <xsl:variable name="BEFORE_NODE" select="$BEFORE/build/*[@log=$AFTER_LOG][1]" />
+        <xsl:variable name="BEFORE_RESULT" select="$BEFORE_NODE/@result" />
+        <xsl:if test="$BEFORE_RESULT = 'fail'">
+            <xsl:value-of select="$AFTER_LOG" />
             <xsl:text> </xsl:text>
         </xsl:if>
     </xsl:for-each>
@@ -243,14 +274,16 @@
 <xsl:template name="FIND_PERMANENT_FAILURES">
     <xsl:param name="BEFORE" />
     <xsl:param name="AFTER" />
-    <xsl:for-each select="$BEFORE/build/*[@result = 'fail']">
+    <xsl:for-each select="$BEFORE/build/*[@result != 'ok']">
         <xsl:sort select="name()" />
         <xsl:sort select="@package" />
         <xsl:sort select="@arch" />
         <xsl:sort select="@scenario" />
+        <xsl:variable name="BEFORE_RESULT" select="./@result" />
         <xsl:variable name="BEFORE_LOG" select="./@log" />
         <xsl:variable name="AFTER_NODE" select="$AFTER/build/*[@log=$BEFORE_LOG][1]" />
-        <xsl:if test="$AFTER_NODE/@result = 'fail'">
+        <xsl:variable name="AFTER_RESULT" select="$AFTER_NODE/@result" />
+        <xsl:if test="($AFTER_RESULT != 'ok') and not(($BEFORE_RESULT = 'skip') and ($AFTER_RESULT = 'fail'))">
             <xsl:value-of select="$BEFORE_LOG" />
             <xsl:text> </xsl:text>
         </xsl:if>
