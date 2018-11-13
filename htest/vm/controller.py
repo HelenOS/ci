@@ -137,14 +137,20 @@ class VMController:
     def same_vterm_tail(self, lines):
         lines_count = len(lines)
         for i in range(-1, -lines_count - 1, -1):
-            if i != -1:
-                if lines[i] != self.full_vterm[i]:
-                    return False
-            else:
-                a = lines[-1].replace("_", " ").strip()
-                b = self.full_vterm[-1].replace("_", " ").strip()
-                if not a.startswith(b):
-                    return False
+            try:
+                if i != -1:
+                    if lines[i] != self.full_vterm[i]:
+                        return False
+                else:
+                    a = lines[-1].replace("_", " ").strip()
+                    b = self.full_vterm[-1].replace("_", " ").strip()
+                    if not a.startswith(b):
+                        return False
+            except IndexError as e:
+                # FIXME: should not happen but maybe we need to
+                # be more defensive here about what can appear
+                # in self.full_vterm...
+                raise Exception("INTERNAL ERROR: same_vterm_tail(i={}, lines={}, full_vterm={})".format(i, lines, self.full_vterm))
         return True
 
     def capture_vterm(self):
