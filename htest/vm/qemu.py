@@ -184,6 +184,11 @@ class QemuVMController(VMController):
         screenshot_term = self.get_temp('screen-term.png')
         screenshot_text = self.get_temp('screen-term.txt')
 
+        try:
+            os.remove(screenshot_full)
+        except IOError as e:
+            pass
+
         self._send_command('screendump ' + screenshot_full)
 
         for xxx in retries(timeout=10, interval=1, name="scrdump", message="Failed to capture screen"):
