@@ -29,6 +29,7 @@
 #
 
 import logging
+import re
 
 from htest.utils import retries
 
@@ -112,8 +113,19 @@ class ScenarioTaskCommand(ScenarioTask):
                 return True
         return False
 
+    def _grep_in_lines(self, comp_re, lines):
+        for l in lines:
+            if comp_re.search(l) is not None:
+                return True
+        return False
+
     def run(self):
         self.logger.info("Typing '{}' into {}.".format(self.command, self.machine.name))
+
+        cursor_symbol = self.machine.get_vterm_cursor_symbol()
+        cursor_symbol_spaced = '' if cursor_symbol == '' else ' ' + cursor_symbol
+        prompt_re = re.compile('^/[^ ]* #' + re.escape(cursor_symbol_spaced) + '[\t ]*$')
+        self.logger.debug("RE for prompt matching: {}".format(prompt_re))
 
         # Capture the screen before typing the command.
         self.machine.capture_vterm()
@@ -130,8 +142,9 @@ class ScenarioTaskCommand(ScenarioTask):
 
             if len(lines) > 0:
                 line = lines[0].strip()
-                if line.endswith("_"):
-                    line = line[0:-1]
+
+                if (cursor_symbol != '') and line.endswith(cursor_symbol):
+                    line = line[0:-(len(cursor_symbol))]
                 if line.endswith(self.command.strip()):
                     break
 
@@ -140,7 +153,9 @@ class ScenarioTaskCommand(ScenarioTask):
 
         # Read output of the command.
         # We wait until prompt reappears or we find some text that is not
-        # supposed to be there.
+        # supposed to be there. Meanwhile we check that the text that is
+        # supposed to be there appears.
+        asserted_text_found = not 'assert' in self.args
         for xxx in retries(timeout=60, interval=2, name="vterm-run", message="Failed to run command"):
             self.logger.debug("self.vterm = {}".format(self.machine.vterm))
             self.machine.capture_vterm()
@@ -153,10 +168,11 @@ class ScenarioTaskCommand(ScenarioTask):
             if 'negassert' in self.args:
                 if self._find_in_lines(self.args['negassert'], lines):
                     raise Exception('Found forbidden text {} ...'.format(self.args['negassert']))
-            if self._find_in_lines('# _', lines):
-                if 'assert' in self.args:
-                    if not self._find_in_lines(self.args['assert'], lines):
-                        raise Exception('Missing expected text {} ...'.format(self.args['assert']))
+            if ('assert' in self.args) and (not asserted_text_found):
+                asserted_text_found = self._find_in_lines(self.args['assert'], lines)
+            if self._grep_in_lines(prompt_re, lines):
+                if not asserted_text_found:
+                    raise Exception('Missing expected text {} ...'.format(self.args['assert']))
                 break
         self.logger.info("Command '{}' done.".format(self.command))
 

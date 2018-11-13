@@ -198,6 +198,13 @@ class VMController:
         """
         return []
 
+    def get_vterm_cursor_symbol(self):
+        """
+        Reimplement if your controller represents cursor in vterm
+        differently than with underscore symbol '_'.
+        """
+        return '_'
+
     def get_temp(self, id):
         """
         Get temporary file name.
