@@ -153,12 +153,10 @@ class ScenarioTaskCommand(ScenarioTask):
             if 'negassert' in self.args:
                 if self._grep(self.args['negassert'], lines):
                     raise Exception('Found forbidden text {} ...'.format(self.args['negassert']))
-            if 'assert' in self.args:
-                if self._grep(self.args['assert'], lines):
-                    break
             if self._grep('# _', lines):
                 if 'assert' in self.args:
-                    raise Exception('Missing expected text {} ...'.format(self.args['assert']))
+                    if not self._grep(self.args['assert'], lines):
+                        raise Exception('Missing expected text {} ...'.format(self.args['assert']))
                 break
         self.logger.info("Command '{}' done.".format(self.command))
 
