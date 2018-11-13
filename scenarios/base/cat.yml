@@ -1,0 +1,11 @@
+meta:
+  name: "cat demo.txt"
+  harbours: []
+
+tasks:
+  - boot
+  - name: Cat demo.txt with multilingual text
+    command:
+      args: "cat demo.txt"
+      assert: "Quick brown fox jumps over the lazy dog"
+
