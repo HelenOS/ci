@@ -82,7 +82,7 @@ class GetTestListTask(Task):
 class ScheduleTestsTask(Task):
     def __init__(self, scheduler, extra_builds, base_path, extra_tester_options):
         self.scheduler = scheduler
-        self.testable_profiles = [ 'ia32', 'amd64', 'arm32/integratorcp', 'ppc32' ]
+        self.testable_profiles = [ 'ia32', 'amd64', 'arm32/integratorcp', 'ppc32', 'mips32/msim' ]
         self.extra_builds = extra_builds
         self.base_path = base_path
         self.extra_tester_options = extra_tester_options
@@ -115,6 +115,11 @@ class ScheduleTestsTask(Task):
                 else:
                     helenos_task = helenos_build_tasks[profile]
                 scenario_flat = scenario.replace('/', '-').replace('.', '-')
+                mutex = []
+                if profile in [ 'ia32', 'amd64', 'arm32/integratorcp', 'ppc32' ]:
+                    mutex = [ 'qemu-kvm' ]
+                elif profile == 'mips32/msim':
+                    mutex = [ 'msim' ]
                 self.scheduler.submit("Testing {} on {}".format(scenario, profile),
                     'test-{}-{}'.format(profile.replace('/', '-'), scenario_flat),
                     TestRunTask(profile, scenario, scenario_filename,
@@ -193,6 +198,8 @@ class TestRunTask(Task):
         if self.profile in ['ia32', 'amd64', 'arm32/integratorcp']:
             command.append('--pass=-serial')
             command.append('--pass=file:{}'.format(serial))
+        if self.profile == 'mips32/msim':
+            command.append('--vm-config={}'.format(os.path.join(my_dir, 'tools/conf/msim.conf')))
         command.append('--scenario')
         command.append(self.scenario)
 
