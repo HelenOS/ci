@@ -177,8 +177,10 @@ exit_code = 0
 try:
     for t in scenario_tasks:
         t.run()
+    print("Scenario passed.")
 except Exception as ex:
-    print(ex)
+    logger.exception("Scenario aborted: {}".format(ex))
+    print("Scenario aborted: {}".format(ex))
     exit_code = 1
 
 vmm.terminate(config.vterm_dump, config.last_screenshot)
