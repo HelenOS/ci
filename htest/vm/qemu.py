@@ -48,6 +48,7 @@ class QemuVMController(VMController):
         'amd64': [
             'qemu-system-x86_64',
             '-cdrom', '{BOOT}',
+            '-boot', 'd',
             '-m', '{MEMORY}',
             '-usb',
             '-device', 'intel-hda', '-device', 'hda-duplex',
@@ -62,6 +63,7 @@ class QemuVMController(VMController):
         'ia32': [
             'qemu-system-i386',
             '-cdrom', '{BOOT}',
+            '-boot', 'd',
             '-m', '{MEMORY}',
             '-usb',
             '-device', 'intel-hda', '-device', 'hda-duplex',
@@ -80,12 +82,13 @@ class QemuVMController(VMController):
         'ocr.sed'
     )
 
-    def __init__(self, arch, name, boot_image):
+    def __init__(self, arch, name, boot_image, disk_image):
         VMController.__init__(self, 'QEMU-' + arch)
         self.arch = arch
         self.booted = False
         self.name = name
         self.boot_image = boot_image
+        self.disk_image = disk_image
 
     def is_supported(arch):
         return arch in QemuVMController.config
@@ -133,6 +136,9 @@ class QemuVMController(VMController):
             elif opt == '{MEMORY}':
                 opt = '{}'.format(self.memory)
             cmd.append(opt)
+        if self.disk_image is not None:
+            cmd.append('-drive')
+            cmd.append('file={},index=0,media=disk,format=raw'.format(self.disk_image))
         if self.is_headless:
             cmd.append('-display')
             cmd.append('none')

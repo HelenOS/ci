@@ -82,6 +82,13 @@ args.add_argument('--image',
     required=True,
     help='HelenOS boot image (e.g. ISO file).'
 )
+args.add_argument('--disk',
+    metavar='FILENAME',
+    dest='disk_image',
+    required=False,
+    default=None,
+    help='Disk image (e.g. hdisk.img).'
+)
 args.add_argument('--pass',
     metavar='OPTION',
     dest='pass_thru_options',
@@ -142,7 +149,7 @@ if controller is None:
     logger.error("Unsupported architecture {}.".format(config.architecture))
     sys.exit(1)
 
-vmm = VMManager(controller, config.architecture, config.boot_image, config.memory, config.headless, config.pass_thru_options)
+vmm = VMManager(controller, config.architecture, config.boot_image, config.disk_image, config.memory, config.headless, config.pass_thru_options)
 
 scenario_tasks = []
 for t in scenario['tasks']:
