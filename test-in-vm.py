@@ -36,6 +36,7 @@ import sys
 
 from htest.vm.controller import VMManager
 from htest.vm.qemu import QemuVMController
+from htest.vm.msim import MsimVMController
 from htest.tasks import *
 
 args = argparse.ArgumentParser(
@@ -89,6 +90,13 @@ args.add_argument('--disk',
     default=None,
     help='Disk image (e.g. hdisk.img).'
 )
+args.add_argument('--vm-config',
+    metavar='FILENAME',
+    dest='vm_config',
+    required=False,
+    default=None,
+    help='VM emulator configuration (e.g. msim.conf)'
+)
 args.add_argument('--pass',
     metavar='OPTION',
     dest='pass_thru_options',
@@ -141,7 +149,7 @@ if config.memory < 8:
     sys.exit(1)
 
 controller = None
-for ctl in [ QemuVMController ]:
+for ctl in [ QemuVMController, MsimVMController ]:
     if ctl.is_supported(config.architecture):
         controller = ctl
 
@@ -149,7 +157,7 @@ if controller is None:
     logger.error("Unsupported architecture {}.".format(config.architecture))
     sys.exit(1)
 
-vmm = VMManager(controller, config.architecture, config.boot_image, config.disk_image, config.memory, config.headless, config.pass_thru_options)
+vmm = VMManager(controller, config.architecture, config.vm_config, config.boot_image, config.disk_image, config.memory, config.headless, config.pass_thru_options)
 
 scenario_tasks = []
 for t in scenario['tasks']:

@@ -82,7 +82,7 @@ class QemuVMController(VMController):
         'ocr.sed'
     )
 
-    def __init__(self, arch, name, boot_image, disk_image):
+    def __init__(self, arch, name, config_ignored, boot_image, disk_image):
         VMController.__init__(self, 'QEMU-' + arch)
         self.arch = arch
         self.booted = False
