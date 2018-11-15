@@ -195,6 +195,10 @@ class MsimVMController(VMController):
             os.remove(self.screendump_file)
         except IOError as e:
             pass
+        try:
+            os.remove(self.screenshot_filename)
+        except IOError as e:
+            pass
         self._xdotool_key('alt+s')
         screenshooter = subprocess.Popen([
             'import',
