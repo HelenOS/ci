@@ -175,6 +175,12 @@ class TaskController:
         except OSError as ex:
             pass
 
+    def remove_silently_recursive(self, path):
+        try:
+            shutil.rmtree(path, True)
+        except OSError as ex:
+            pass
+
     def set_log_file(self, log_filename):
         # TODO: open the log lazily
         # TODO: propagate the information to XML report

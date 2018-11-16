@@ -184,6 +184,8 @@ class TestRunTask(Task):
         self.ctl.remove_silently(screenshot)
         self.ctl.remove_silently(serial)
 
+        self.ctl.remove_silently_recursive('tmp-vm-python')
+
         command = [
             self.tester,
             '--debug',
