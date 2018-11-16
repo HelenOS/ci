@@ -151,6 +151,8 @@ class MsimVMController(VMController):
         time.sleep(2)
 
         if self.xterm.poll() is not None:
+            self.screendump_file = None
+            self.screenshot_filename = None
             raise Exception("Failed to start MSIM")
 
         self.logger.info("Machine started.")
@@ -223,6 +225,8 @@ class MsimVMController(VMController):
 
     def terminate(self):
         if not self.booted:
+            self.screendump_file = None
+            self.screenshot_filename = None
             return
         if self.xterm is not None:
             self.xterm.kill()
