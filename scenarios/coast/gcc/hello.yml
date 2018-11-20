@@ -1,0 +1,21 @@
+meta:
+  name: "gcc hello.c"
+  harbours:
+     - gcc
+     - binutils
+
+# As there may not be enough free space for temporary
+# files on root FS, we copy the source to /tmp and
+# compile there.
+
+tasks:
+  - boot
+  - command:
+      args: "cp /src/c/demos/hello/hello.c /tmp/hello.c"
+  - command:
+      args: "cd /tmp"
+  - command:
+      args: "gcc hello.c"
+  - command:
+      args: "./a.out"
+      assert: "hello!"
