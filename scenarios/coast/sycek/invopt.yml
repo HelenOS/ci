@@ -1,0 +1,11 @@
+meta:
+  name: "Ccheck invalid option"
+  harbours:
+     - sycek
+
+tasks:
+  - boot
+  - command:
+      args: "ccheck --foo"
+      assert: "Invalid option."
+      ignoreabort: true
