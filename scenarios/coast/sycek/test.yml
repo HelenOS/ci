@@ -1,0 +1,10 @@
+meta:
+  name: "Ccheck internal unit tests"
+  harbours:
+     - sycek
+
+tasks:
+  - boot
+  - command:
+      args: "ccheck --test"
+      assert: "test_checker -> 0"

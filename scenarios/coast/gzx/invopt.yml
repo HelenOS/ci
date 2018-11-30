@@ -1,0 +1,13 @@
+meta:
+  name: "GZX invalid option"
+  harbours:
+     - gzx
+
+tasks:
+  - boot
+  - command:
+      args: "cd /gzx"
+  - command:
+      args: "./gzx --foo"
+      assert: "Invalid option '--foo'."
+      ignoreabort: true
