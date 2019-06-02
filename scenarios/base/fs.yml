@@ -7,7 +7,7 @@ tasks:
   - command: "mkfile --size 2m /tmp/img"
   - name: Checking image file has the right size.
     command:
-      args: "ls /tmp"
+      args: "ls -e /tmp"
       assert:  "2097152"
   - name: Starting file_bd
     command:
