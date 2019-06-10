@@ -179,7 +179,6 @@ class QemuVMController(VMController):
                 break
 
         assert uspace_booted
-        self.full_vterm = self.vterm
 
         self.logger.info("Machine booted into userspace.")
 

@@ -160,7 +160,6 @@ class MsimVMController(VMController):
         uspace_booted = False
         for xxx in retries(timeout=10*60, interval=5, name="vterm", message="Failed to boot into userspace"):
             self.vterm = []
-            self.full_vterm = []
             self.capture_vterm()
             for l in self.vterm:
                 if l.find('to see a few survival tips') != -1:
@@ -170,7 +169,6 @@ class MsimVMController(VMController):
                 break
 
         assert uspace_booted
-        self.full_vterm = self.vterm
 
         self.logger.info("Machine booted into userspace.")
 
