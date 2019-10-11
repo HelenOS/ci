@@ -48,10 +48,20 @@ class HelenOSBuildTask(Task):
     def run(self):
         my_dir = self.ctl.make_temp_dir('build/%s/helenos' % self.build_dir_basename)
         self.ctl.recursive_copy(self.src_dir, my_dir)
-        res = self.ctl.run_command([ 'make', 'distclean' ], cwd=my_dir)
+        
+        build_dir = my_dir + '/build'
+        
+        self.ctl.run_command([ 'mkdir', build_dir ], cwd=my_dir);
+        
+        res = self.ctl.run_command([ 'sh', my_dir + '/configure.sh', self.profile ], cwd=build_dir);
         if res['failed']:
             return False
-        res = self.ctl.run_command([ 'make', 'PROFILE=' + self.profile, 'HANDS_OFF=y' ], cwd=my_dir)
+        
+        res = self.ctl.run_command([ 'ninja' ], cwd=build_dir)
+        if res['failed']:
+            return False
+        
+        res = self.ctl.run_command([ 'ninja', 'image_path' ], cwd=build_dir)
         if res['failed']:
             return False
         
@@ -65,7 +75,7 @@ class HelenOSBuildTask(Task):
             profile_flat = self.profile.replace("/", "-")
             xxx, image_extension = os.path.splitext(self.image)
             target_image_name = '%s/helenos-%s%s' % ( profile_flat, profile_flat, image_extension )
-            build_image_name = '%s/%s' % ( my_dir, self.image )
+            build_image_name = '%s/%s' % ( build_dir, self.image )
             ret['image'] = self.ctl.add_downloadable_file("HelenOS boot image", target_image_name, build_image_name)
         
         return ret
@@ -83,6 +93,8 @@ class HelenOSBuildWithHarboursTask(Task):
         if res['failed']:
             return False
         
+        build_dir = my_dir + '/build'
+        
         # Unpack the tarball
         for h in self.harbours:
             tarball = self.ctl.get_dependency_data('harbour-{}'.format(h))
@@ -96,7 +108,11 @@ class HelenOSBuildWithHarboursTask(Task):
             if res['failed']:
                 return False
         
-        res = self.ctl.run_command([ 'make' ], cwd=my_dir)
+        res = self.ctl.run_command([ 'ninja' ], cwd=build_dir)
+        if res['failed']:
+            return False
+        
+        res = self.ctl.run_command([ 'ninja', 'image_path' ], cwd=build_dir)
         if res['failed']:
             return False
         
@@ -110,7 +126,7 @@ class HelenOSBuildWithHarboursTask(Task):
             profile_flat = self.profile.replace("/", "-")
             xxx, image_extension = os.path.splitext(image_name)
             target_image_name = '{}/helenos-{}-with-{}{}'.format( profile_flat, profile_flat, '-'.join(self.harbours), image_extension )
-            build_image_name = os.path.join(my_dir, image_name)
+            build_image_name = os.path.join(build_dir, image_name)
             ret['image'] = self.ctl.add_downloadable_file("HelenOS boot image with {}".format(', '.join(self.harbours)), target_image_name, build_image_name)
             
         return ret
