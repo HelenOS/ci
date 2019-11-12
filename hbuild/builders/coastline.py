@@ -177,7 +177,7 @@ class CoastlinePrebuildTask(Task):
         
         my_dir = self.ctl.make_temp_dir('build/%s/coast' % self.build_dir_basename)
         hsrootdir = self.ctl.make_temp_dir('build/%s/helenos' % self.build_dir_basename)
-        self.ctl.run_command([ root + '/hsct.sh', 'init', hsrootdir ], cwd=my_dir)
+        self.ctl.run_command([ root + '/hsct.sh', 'init', hsrootdir, self.profile ], cwd=my_dir)
         with open('%s/config.sh' % my_dir, 'a') as cfg:
             cfg.write("HSCT_FORMAT=\"%s\"\n" % self.archive_format)
             cfg.write("HSCT_SOURCES_DIR=\"%s\"\n" % self.ctl.make_temp_dir('mirror/sources'))
