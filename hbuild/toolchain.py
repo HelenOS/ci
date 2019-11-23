@@ -29,6 +29,7 @@
 #
 
 from shutil import which
+import importlib.util
 
 def check_tool(name, printer):
     printer.print_starting("Checking {} is installed.".format(name))
@@ -38,3 +39,12 @@ def check_tool(name, printer):
         printer.print_fail(msg)
         raise NotImplementedError(msg)
     printer.print_ok("{} found at {}".format(name, tool_location))
+
+def check_package(name, printer):
+    printer.print_starting("Checking {} for Python is installed.".format(name))
+    spec = importlib.util.find_spec(name)
+    if spec is None:
+        msg = "{} for Python not found.".format(name)
+        printer.print_fail(msg)
+        raise NotImplementedError(msg)
+    printer.print_ok("{} for Python found at {}".format(name, spec.origin))

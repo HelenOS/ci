@@ -43,13 +43,23 @@ from hbuild.gendoc import BrowsableSourcesViaGnuGlobalTask, DoxygenTask
 from hbuild.checkers.sycek import SycekBuildTask, SycekCheckTask
 from hbuild.web import *
 from hbuild.output import ConsolePrinter
-from hbuild.toolchain import check_tool
+from hbuild.toolchain import check_tool, check_package
 
 REQUIRED_TOOLS = [
     'convert',
     'msim',
     'meson',
     'ninja',
+]
+
+REQUIRED_PACKAGES = [
+    'argparse',
+    'logging',
+    'multiprocessing',
+    'socket',
+    'subprocess',
+    'yaml',
+    'PIL',
 ]
 
 def create_checkout_task(name, url):
@@ -156,6 +166,8 @@ if config.tool_check:
     try:
         for tool in REQUIRED_TOOLS:
             check_tool(tool, printer)
+        for pkg in REQUIRED_PACKAGES:
+            check_package(pkg, printer)
     except NotImplementedError:
         sys.exit(1)
 
