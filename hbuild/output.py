@@ -89,3 +89,9 @@ class ConsolePrinter:
     
     def print_warning(self, message):
         self.print_finished(self.RED, "warn", message)
+
+    def print_fail(self, message):
+        self.print_finished(self.RED, "fail", message)
+
+    def print_ok(self, message):
+        self.print_finished(self.GREEN, " ok ", message)

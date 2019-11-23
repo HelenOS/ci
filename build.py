@@ -43,6 +43,14 @@ from hbuild.gendoc import BrowsableSourcesViaGnuGlobalTask, DoxygenTask
 from hbuild.checkers.sycek import SycekBuildTask, SycekCheckTask
 from hbuild.web import *
 from hbuild.output import ConsolePrinter
+from hbuild.toolchain import check_tool
+
+REQUIRED_TOOLS = [
+    'convert',
+    'msim',
+    'meson',
+    'ninja',
+]
 
 def create_checkout_task(name, url):
     if url.startswith("wip://"):
@@ -119,6 +127,10 @@ args.add_argument('--no-doxygen', default=True, dest='doxygen',
     action='store_false',
     help='Do not run Doxygen.'
 )
+args.add_argument('--no-tool-check', default=True, dest='tool_check',
+    action='store_false',
+    help='Do not check that all tools are installed.'
+)
 args.add_argument('--jobs', default=multiprocessing.cpu_count(), dest='jobs',
     type=int,
     metavar='COUNT',
@@ -139,6 +151,13 @@ config.build_directory = os.path.abspath(config.build_directory)
 config.self_path = os.path.dirname(os.path.realpath(sys.argv[0]))
 
 printer = ConsolePrinter(config.no_colors)
+
+if config.tool_check:
+    try:
+        for tool in REQUIRED_TOOLS:
+            check_tool(tool, printer)
+    except NotImplementedError:
+        sys.exit(1)
 
 if config.vm_memory_size < 8:
     printer.print_warning("VM memory size too small, upgrading to 8MB.")
