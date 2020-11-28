@@ -376,7 +376,7 @@ xx_do_screenshot() {
         # Looping as the screenshot might take some time to save
         local retries=3
         while true; do
-            if convert "$2" -crop 640x480+4+24 +repage -colors 2 -monochrome "$3"; then
+            if convert "$2" -crop 640x480+4+26 +repage -colors 2 -monochrome "$3"; then
                 break
             fi
             retries=$(( $retries - 1 ))

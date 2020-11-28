@@ -201,7 +201,7 @@ class QemuVMController(VMController):
                 self._run_command([
                     'convert',
                     screenshot_full,
-                    '-crop', '640x480+4+24',
+                    '-crop', '640x480+4+26',
                     '+repage',
                     '-colors', '2',
                     '-monochrome',
