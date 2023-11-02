@@ -203,8 +203,8 @@ class QemuVMController(VMController):
                     screenshot_full,
                     '-crop', '640x480+4+26',
                     '+repage',
-                    '-colors', '2',
                     '-monochrome',
+                    '-colors', '2',
                     screenshot_term
                 ])
                 break
