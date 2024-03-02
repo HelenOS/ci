@@ -139,14 +139,16 @@ class MsimVMController(VMController):
 
         xterm_env = os.environ.copy()
         xterm_env['DISPLAY'] = self.x11_display
-        self.xterm = subprocess.Popen([
+        xterm_cmd = [
             'xterm',
             '-xrm', 'XTerm*printAttributes: 0',
             '-xrm', 'XTerm*printerCommand: cat - > "{}"'.format(self.screendump_file),
             '-xrm', 'XTerm.VT100.translations: #override Meta <KeyPress> S: print() \n',
             '-e',
-            'msim -c ' + config_file
-        ], env=xterm_env)
+            'msim -n -c ' + config_file
+        ]
+        self.logger.debug("Will run %s", xterm_cmd)
+        self.xterm = subprocess.Popen(xterm_cmd, env=xterm_env)
 
         time.sleep(2)
 
