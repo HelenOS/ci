@@ -39,16 +39,16 @@ class BrowsableSourcesViaGnuGlobalTask(Task):
         root_dir = self.ctl.get_dependency_data('dir')
         my_dir = self.ctl.make_temp_dir('build/browsable')
         self.ctl.recursive_copy(root_dir, my_dir)
-        
+
         # For debugging, it is much better to generate the
         # documentation in a sub-directory to speed things-up
         # Following line is a possible way how to do that:
         # my_dir = os.path.join(my_dir, 'abi')
-        
+
         res = self.ctl.run_command([ 'gtags' ], cwd=my_dir)
         if res['failed']:
             return False
-        
+
         res = self.ctl.run_command([
                 'htags',
                 '--tree-view',
@@ -57,12 +57,12 @@ class BrowsableSourcesViaGnuGlobalTask(Task):
             ], cwd=my_dir)
         if res['failed']:
             return False
-        
+
         footer_links = [
             '<a href="http://www.helenos.org">HelenOS homepage</a>',
             '<a href="https://github.com/HelenOS/helenos">sources at GitHub</a>',
         ]
-        
+
         res = self.ctl.run_command([
                 'find',
                 os.path.join(my_dir, 'HTML/'),
@@ -77,13 +77,13 @@ class BrowsableSourcesViaGnuGlobalTask(Task):
             ], cwd=my_dir)
         if res['failed']:
             return False
-        
+
         self.ctl.move_dir_to_downloadable('Browsable sources', 'sources', os.path.join(my_dir, 'HTML'))
-        
+
         ret = {
             'dir': my_dir,
         }
-        
+
         return ret
 
 class DoxygenTask(Task):

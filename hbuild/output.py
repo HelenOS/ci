@@ -37,7 +37,7 @@ class ConsolePrinter:
     GREEN = 2
     CYAN = 3
     YELLOW = 4
-    
+
     def __init__(self, disable_colors):
         use_colors = not disable_colors
         if use_colors:
@@ -46,7 +46,7 @@ class ConsolePrinter:
                 colorama.init()
             except ImportError:
                 use_colors = False
-        
+
         if use_colors:
             import colorama
             self.color_reset = colorama.Style.RESET_ALL
@@ -66,27 +66,27 @@ class ConsolePrinter:
                 ConsolePrinter.CYAN: "",
                 ConsolePrinter.YELLOW: "",
             }
-        
+
         # Lock guarding output synchronization
         self.output_lock = Lock()
-    
+
     def print_(self, message):
         with self.output_lock:
             print(self.color_reset + message)
             sys.stdout.flush()
-    
+
     def print_starting(self, message):
         self.print_("       " + message)
-    
+
     def print_finished(self, color, prefix, message):
         if not color in self.colors:
             color = ConsolePrinter.DEFAULT
-        
+
         self.print_("[" + self.colors[color] + prefix + self.color_reset + "] " + message)
-    
+
     def print_debug(self, context, message):
         self.print_finished(self.YELLOW, "debug " + context, message)
-    
+
     def print_warning(self, message):
         self.print_finished(self.RED, "warn", message)
 

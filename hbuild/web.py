@@ -37,16 +37,16 @@ class MakeHtmlReportTask(Task):
         self.root = os.path.abspath(root_path)
         self.rss_url = rss_url
         self.static_resources_relative_path = resource_path
-    
+
     def copy_file_to_downloadable(self, source_filename, dest_filename):
         with open(os.path.join(self.root, source_filename)) as input:
             content = input.read()
             with self.ctl.open_downloadable_file(dest_filename, 'w') as output:
                 output.write(content)
-    
+
     def run(self):
         copy_static_resources = False
-        
+
         if self.static_resources_relative_path is None:
             self.static_resources_relative_path = './'
             copy_static_resources = True
@@ -57,22 +57,22 @@ class MakeHtmlReportTask(Task):
                 'CONFIG_RESOURCE_DIR',
                 self.static_resources_relative_path,
         ]
-        
+
         if not self.rss_url is None:
             command.append('--stringparam')
             command.append('CONFIG_RSS_PATH')
             command.append(self.rss_url)
-        
+
         command.append(os.path.join(self.root, 'hbuild/web/report.xsl'))
         command.append(self.ctl.get_artefact_absolute_path('report.xml'))
-        
+
         res = self.ctl.run_command(command, needs_output=True)
         if res['failed']:
             return False
-        
+
         with self.ctl.open_downloadable_file('index.html', 'w') as index_html:
             index_html.write(res['stdout'])
-        
+
         if copy_static_resources:
             for filename in [ 'main.css', 'jquery-2.1.4.min.js' ]:
                 src = os.path.join('hbuild/web/', filename)

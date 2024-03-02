@@ -44,40 +44,40 @@ class HelenOSBuildTask(Task):
         self.src_dir = src_dir
         self.image = image_name
         Task.__init__(self, 'helenos-build', arch=profile)
-    
+
     def run(self):
         my_dir = self.ctl.make_temp_dir('build/%s/helenos' % self.build_dir_basename)
         self.ctl.recursive_copy(self.src_dir, my_dir)
-        
+
         build_dir = my_dir + '/build'
-        
+
         self.ctl.run_command([ 'mkdir', build_dir ], cwd=my_dir);
-        
+
         res = self.ctl.run_command([ 'sh', my_dir + '/configure.sh', self.profile ], cwd=build_dir);
         if res['failed']:
             return False
-        
+
         res = self.ctl.run_command([ 'ninja' ], cwd=build_dir)
         if res['failed']:
             return False
-        
+
         res = self.ctl.run_command([ 'ninja', 'image_path' ], cwd=build_dir)
         if res['failed']:
             return False
-        
+
         ret = {
             'image': None,
             'built-image': self.image,
             'dir': my_dir,
         }
-        
+
         if not self.image is None:
             profile_flat = self.profile.replace("/", "-")
             xxx, image_extension = os.path.splitext(self.image)
             target_image_name = '%s/helenos-%s%s' % ( profile_flat, profile_flat, image_extension )
             build_image_name = '%s/%s' % ( build_dir, self.image )
             ret['image'] = self.ctl.add_downloadable_file("HelenOS boot image", target_image_name, build_image_name)
-        
+
         return ret
 
 class HelenOSBuildWithHarboursTask(Task):
@@ -85,16 +85,16 @@ class HelenOSBuildWithHarboursTask(Task):
         self.profile = profile
         self.harbours = harbours
         Task.__init__(self, 'helenos-extra-build', arch=profile, harbours=','.join(harbours))
-    
+
     def run(self):
         my_dir = self.ctl.get_dependency_data('dir')
         res = self.ctl.run_command([ 'rm', '-rf', os.path.join('uspace', 'overlay')], cwd=my_dir)
         os.makedirs(os.path.join(my_dir, 'uspace', 'overlay'), exist_ok=True)
         if res['failed']:
             return False
-        
+
         build_dir = my_dir + '/build'
-        
+
         # Unpack the tarball
         for h in self.harbours:
             tarball = self.ctl.get_dependency_data('harbour-{}'.format(h))
@@ -107,20 +107,20 @@ class HelenOSBuildWithHarboursTask(Task):
             res = self.ctl.run_command(command, cwd=os.path.join(my_dir, 'uspace', 'overlay'))
             if res['failed']:
                 return False
-        
+
         res = self.ctl.run_command([ 'ninja' ], cwd=build_dir)
         if res['failed']:
             return False
-        
+
         res = self.ctl.run_command([ 'ninja', 'image_path' ], cwd=build_dir)
         if res['failed']:
             return False
-        
+
         ret = {
             'image': None,
             'dir': my_dir,
         }
-        
+
         image_name = self.ctl.get_dependency_data('built-image')
         if not image_name is None:
             profile_flat = self.profile.replace("/", "-")
@@ -128,7 +128,7 @@ class HelenOSBuildWithHarboursTask(Task):
             target_image_name = '{}/helenos-{}-with-{}{}'.format( profile_flat, profile_flat, '-'.join(self.harbours), image_extension )
             build_image_name = os.path.join(build_dir, image_name)
             ret['image'] = self.ctl.add_downloadable_file("HelenOS boot image with {}".format(', '.join(self.harbours)), target_image_name, build_image_name)
-            
+
         return ret
 
 class HelenOSExtraBuildsManager:
@@ -137,33 +137,33 @@ class HelenOSExtraBuildsManager:
         self.already_scheduled = []
         self.helenos_tasks = {}
         self.coastline_tasks = {}
-        
+
     def set_dependent_tasks(self, helenos_tasks, coastline_tasks):
         self.helenos_tasks = helenos_tasks
         self.coastline_tasks = coastline_tasks
-    
+
     def build(self, profile, harbours):
         #print("HelenOSExtraBuildsManager.build({}, {})".format(profile, harbours))
         harbours = sorted(harbours)
-        
+
         key = 'extra-{}-with-{}'.format(profile.replace('/', '-'), '-'.join(harbours))
         if key in self.already_scheduled:
             return key
-        
+
         # FIXME - propagate the problem in a more meaningful way
         if not profile in self.helenos_tasks.keys():
             return None
         if not profile in self.coastline_tasks.keys():
             return None
-        
+
         deps = [ self.helenos_tasks[profile] ]
         for h in harbours:
             if not h in self.coastline_tasks[profile].keys():
                 return None
             deps.append(self.coastline_tasks[profile][h])
-        
+
         self.already_scheduled.append(key)
-                
+
         self.scheduler.submit(
             "Special build of {} with {}".format(profile, ','.join(harbours)),
             key,
@@ -171,14 +171,14 @@ class HelenOSExtraBuildsManager:
             deps,
             [ 'extras-{}'.format(profile) ]
         )
-        
+
         return key
 
 class HelenOSGetProfilesTask(Task):
     def __init__(self, platform_filter):
         self.platform_filter = platform_filter
         Task.__init__(self, None)
-    
+
     def _try_read_output_filename(self, dirname):
         try:
             with open('%s/output' % dirname, 'r') as output:
@@ -221,13 +221,13 @@ class HelenOSGetProfilesTask(Task):
 
         if 'ALL' in self.platform_filter:
             self.platform_filter = profiles.keys()
-        
+
         profiles_filtered = {}
         for p in profiles:
             p_wildcard = p.split('/')[0] + '/*'
             if (p in self.platform_filter) or (p_wildcard in self.platform_filter):
                 profiles_filtered[p] = profiles[p]
-        
+
         self.ctl.dprint("%s", profiles_filtered)
 
         return {
@@ -239,7 +239,7 @@ class HelenOSScheduleBuildsTask(Task):
     def __init__(self, scheduler):
         self.scheduler = scheduler
         Task.__init__(self, None)
-    
+
     def run(self):
         profiles = self.ctl.get_dependency_data('profiles')
         root_dir = self.ctl.get_dependency_data('dir')

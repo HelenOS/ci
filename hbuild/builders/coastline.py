@@ -41,7 +41,7 @@ class CoastlineGetHarboursTask(Task):
     def __init__(self, harbour_filter):
         self.harbour_filter = harbour_filter
         Task.__init__(self, None)
-        
+
     def get_harbour_profiles(self, harbour_file):
         try:
             cmd = '. %s; echo $shipprofiles;' % harbour_file
@@ -49,7 +49,7 @@ class CoastlineGetHarboursTask(Task):
             return res['stdout'].split()
         except RunCommandException as e:
             return []
-    
+
     def get_harbour_dependencies(self, harbour_file):
         try:
             cmd = '. %s; echo $shiptugs;' % harbour_file
@@ -57,7 +57,7 @@ class CoastlineGetHarboursTask(Task):
             return res['stdout'].split()
         except RunCommandException as e:
             return []
-    
+
     def run(self):
         root = self.ctl.get_dependency_data('dir')
         self.ctl.dprint("Looking into %s", root)
@@ -71,7 +71,7 @@ class CoastlineGetHarboursTask(Task):
                 harbours.append(name)
                 dependencies[name] = self.get_harbour_dependencies(canon)
                 profiles[name] = self.get_harbour_profiles(canon)
-        
+
         # Clean-up the dependencies
         for h in harbours:
             deps = dependencies[h]
@@ -79,11 +79,11 @@ class CoastlineGetHarboursTask(Task):
             for d in deps:
                 if d in harbours:
                     dependencies[h].append(d)
-        
+
         # Filter which harbours should be actually built
         if 'ALL' in self.harbour_filter:
             self.harbour_filter = dependencies.keys()
-        
+
         harbours_to_build = {}
         for h in harbours:
             if h in self.harbour_filter:
@@ -97,9 +97,9 @@ class CoastlineGetHarboursTask(Task):
                     if not d in harbours_to_build:
                         harbours_to_build[d] = True
                         dependency_added = True
-        
+
         self.ctl.dprint("harbours_to_build = %s", list(harbours_to_build.keys()))
-        
+
         # Sort harbours in buildable order
         build_order = []
         remaining_dependencies = dependencies.copy()
@@ -119,12 +119,12 @@ class CoastlineGetHarboursTask(Task):
                 del remaining_dependencies[l]
                 for d in remaining_dependencies:
                     remaining_dependencies[d] = [x for x in remaining_dependencies[d] if x != l]
-        
-        
+
+
         self.ctl.dprint("harbours = %s", build_order)
         self.ctl.dprint("deps = %s" , dependencies)
         self.ctl.dprint("profiles = %s", profiles)
-        
+
         return {
             'harbours': build_order,
             'harbour_deps': dependencies,
@@ -138,7 +138,7 @@ class CoastlineFetchTask(Task):
         self.root = root
         self.mirror = mirror
         Task.__init__(self, 'harbour-fetch', package=harbour)
-    
+
     def run(self):
         self.ctl.run_command([ self.root + '/hsct.sh', 'fetch', self.harbour ], cwd=self.mirror)
 
@@ -147,7 +147,7 @@ class CoastlineScheduleFetchesTask(Task):
     def __init__(self, scheduler):
         self.scheduler = scheduler
         Task.__init__(self, None)
-    
+
     def run(self):
         harbours = self.ctl.get_dependency_data('harbours')
         coastline_root = self.ctl.make_temp_dir('repo/coastline')
@@ -171,10 +171,10 @@ class CoastlinePrebuildTask(Task):
         self.build_dir_basename = build_dir_basename
         self.archive_format = archive_format
         Task.__init__(self, None)
-    
+
     def run(self):
         root = self.ctl.make_temp_dir('repo/coastline')
-        
+
         my_dir = self.ctl.make_temp_dir('build/%s/coast' % self.build_dir_basename)
         hsrootdir = self.ctl.make_temp_dir('build/%s/helenos' % self.build_dir_basename)
         self.ctl.run_command([ root + '/hsct.sh', 'init', hsrootdir, self.profile ], cwd=my_dir)
@@ -182,7 +182,7 @@ class CoastlinePrebuildTask(Task):
             cfg.write("HSCT_FORMAT=\"%s\"\n" % self.archive_format)
             cfg.write("HSCT_SOURCES_DIR=\"%s\"\n" % self.ctl.make_temp_dir('mirror/sources'))
             cfg.write("HSCT_PARALLELISM=1\n")
-        
+
         return {
             'dir': my_dir
         }
@@ -193,23 +193,23 @@ class CoastlineBuildTask(Task):
         self.profile = profile
         self.archive_format = archive_format
         Task.__init__(self, 'harbour-build', package=harbour, arch=profile)
-    
+
     def run(self):
         my_dir = self.ctl.get_dependency_data('dir')
-        
+
         root = self.ctl.make_temp_dir('repo/coastline')
-        
+
         res = self.ctl.run_command([ root + '/hsct.sh', 'archive', self.harbour ], cwd=my_dir)
         if res['failed']:
             return False
-        
+
         # Add downloadable archive
         profile_flat = self.profile.replace("/", "-")
         title = "%s for %s" % ( self.harbour, self.profile )
         target_filename = '%s/%s-for-helenos-%s.%s' % ( profile_flat, self.harbour, profile_flat, self.archive_format )
         current_filename = '%s/archives/%s.%s' % ( my_dir, self.harbour, self.archive_format )
         self.ctl.add_downloadable_file(title, target_filename, current_filename)
-        
+
         return {
             'harbour-{}'.format(self.harbour): current_filename
         }
@@ -220,28 +220,28 @@ class CoastlineScheduleBuildsTask(Task):
         self.scheduler = scheduler
         self.archive_format =archive_format
         Task.__init__(self, None)
-    
+
     def run(self):
         profiles = self.ctl.get_dependency_data('profiles')
         harbours = self.ctl.get_dependency_data('harbours')
         harbour_deps = self.ctl.get_dependency_data('harbour_deps')
         harbour_profiles = self.ctl.get_dependency_data('harbour_profiles')
-        
+
         ret = {}
-        
+
         for p in profiles:
             if p == 'special/abs32le':
                 continue
-            
+
             ret[ p ] = {}
-            
+
             p_flat = p.replace("/", "-")
-            
+
             self.scheduler.submit("Preparing coastline for %s" % p,
                 "coastline-prepare-for-%s" % p_flat,
                 CoastlinePrebuildTask(p, p_flat, self.archive_format),
                 [ "helenos-build-%s" % p_flat ])
-            
+
             for h in harbours:
                 if len(harbour_profiles[h]) > 0 and p not in harbour_profiles[ h ]:
                     continue
@@ -257,9 +257,9 @@ class CoastlineScheduleBuildsTask(Task):
                     task_name,
                     CoastlineBuildTask(h, p, self.archive_format),
                     deps)
-                
+
                 ret[p][h] = task_name
-        
+
         return {
             'harbour_tasks' : ret
         }

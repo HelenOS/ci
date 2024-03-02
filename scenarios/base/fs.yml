@@ -20,7 +20,7 @@ tasks:
       assert: "Success"
       negassert: "Failed to create FAT file system"
   - name: Creating a dedicated mount-point
-    command: "mkdir /tmp/mnt" 
+    command: "mkdir /tmp/mnt"
   - name: Mounting the file system
     command:
       args: "mount fat /tmp/mnt fbd0"

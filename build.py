@@ -188,7 +188,7 @@ scheduler = BuildScheduler(
 #
 # Check-out both HelenOS and coastline repositories
 scheduler.submit("Checking-out HelenOS",
-    "helenos-checkout", 
+    "helenos-checkout",
     create_checkout_task("helenos", config.helenos_repository))
 scheduler.submit("Checking-out Coastline",
     "coastline-checkout",
@@ -272,7 +272,7 @@ scheduler.submit("Determine available test scenarios",
 
 scheduler.submit("Schedule tests",
     "tests-schedule",
-    ScheduleTestsTask(scheduler, 
+    ScheduleTestsTask(scheduler,
         extra_builds,
         config.self_path,
         [ "--memory={}".format(config.vm_memory_size) ]

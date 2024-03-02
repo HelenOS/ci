@@ -32,7 +32,7 @@
 # This code was originally inspired by "virtual testing lab" scripts created
 # by Jan Buchar for testing his firewall implementation in HelenOS:
 # https://code.launchpad.net/~teyras/hpf-virtlab/trunk
-# 
+#
 
 xx_echo() {
     echo ">>" "$@"
@@ -154,7 +154,7 @@ xx_get_boolean_var() {
         echo
     fi
 }
-    
+
 
 xx_shutdown() {
     local i
@@ -169,7 +169,7 @@ xx_assert_var() {
         xx_echo "Option $1 not specified or invalid, terminating."
         xx_shutdown
     fi
-}    
+}
 
 xx_do_check_var() {
     if [ -z "$2" ]; then
@@ -186,22 +186,22 @@ xx_do_compute_timeout() {
     echo $(( `date +%s` + 10 * $1 ))
 }
 
-# 
+#
 xx_start_machine() {
     local cdrom=`xx_get_var cdrom "$XX_CDROM_FILE" "$@"`
     local name=`xx_get_var name default "$@"`
     local wait_for_vterm=`xx_get_boolean_var vterm true "$@"`
-    
+
     xx_do_check_var "xx_start_machine/name" "$name" '^[a-zA-Z][0-9a-zA-Z]*$'
     xx_do_check_var "xx_start_machine/cdrom" "$cdrom"
-    
+
     local extra_opts=""
     if $XX_HEADLESS; then
         extra_opts="-display none"
     fi
-        
+
     xx_echo "Starting machine $name from $cdrom."
-    
+
     local qemu_command=""
     local qemu_opts=""
     local qemu_common_network_options="-device e1000,netdev=n1 \
@@ -226,12 +226,12 @@ xx_start_machine() {
         qemu_opts="-M integratorcp -usb -kernel $cdrom"
     elif [ "$XX_ARCH" == "ppc32" ]; then
         qemu_command=qemu-system-ppc
-        qemu_opts="$qemu_common_network_options -usb -boot d -cdrom $cdrom" 
+        qemu_opts="$qemu_common_network_options -usb -boot d -cdrom $cdrom"
     fi
     if [ -z "$qemu_command" ]; then
         xx_fatal "Unable to find proper emulator."
     fi
-    
+
     xx_run_debug $qemu_command \
         $extra_opts \
         $qemu_opts \
@@ -239,15 +239,15 @@ xx_start_machine() {
         -daemonize -pidfile "$XX_TEMP/$name.pid" \
         -monitor "unix:$XX_TEMP/$name.monitor,server,nowait"
     sleep 1
-    
+
     if  $has_grub; then
         xx_do_qemu_command "$name" "sendkey ret"
     fi
-    
+
     XX_LAST_MACHINE=$name
-    
+
     XX_KNOWN_MACHINES="$XX_KNOWN_MACHINES $name"
-    
+
     if $wait_for_vterm; then
         xx_echo2 "Waiting for OS to boot into GUI..."
         if ! xx_do_wait_for_text "$name" `xx_do_compute_timeout 60` "to see a few survival tips"; then
@@ -258,17 +258,17 @@ xx_start_machine() {
 
 
 
-# 
+#
 xx_stop_machine() {
     local name=`xx_get_var name $XX_LAST_MACHINE "$@"`
-    
+
     xx_echo "Forcefully killing machine $name."
     if [ -e "$XX_TEMP/$name.monitor" ]; then
         xx_do_qemu_command "$name" "quit" nodie
     fi
     sleep 1
     kill -9 `cat "$XX_TEMP/$name.pid" 2>/dev/null` 2>/dev/null
-    
+
     if [ "$name" = "$XX_LAST_MACHINE" ]; then
         XX_LAST_MACHINE=""
     fi
@@ -283,18 +283,18 @@ xx_stop_machine() {
 xx_do_wait_for_text() {
     while true; do
         xx_activity "Taking screenshot, looking for '$3'."
-        
+
         xx_do_screenshot "$1" "$XX_TEMP/$1-full.ppm" \
             "$XX_TEMP/$1-term.png" "$XX_TEMP/$1-term.txt"
-        
+
         if grep -q "$3" <"$XX_TEMP/$1-term.txt"; then
             return 0
         fi
-        
+
         if [ `date +%s` -gt $2 ]; then
             return 1
         fi
-        
+
         sleep 1
     done
 }
@@ -304,9 +304,9 @@ xx_assert() {
     local machine=`xx_get_var machine $XX_LAST_MACHINE "$@"`
     local error_msg=`xx_get_var error "" "$@"`
     local text=`xx_get_def_var "$@"`
-    
+
     xx_echo "Checking that '$text' will appear on $machine within ${timeout}s."
-    
+
     if ! xx_do_wait_for_text "$machine" `xx_do_compute_timeout $timeout` "$text"; then
         xx_fatal "Failed to recognize '$text' on $machine."
     fi
@@ -317,17 +317,17 @@ xx_die_on() {
     local machine=`xx_get_var machine $XX_LAST_MACHINE "$@"`
     local error_msg=`xx_get_var message "" "$@"`
     local text=`xx_get_def_var "$@"`
-    
+
     xx_echo "Checking that '$text' will not appear on $machine within ${timeout}s."
-    
+
     if xx_do_wait_for_text "$machine" `xx_do_compute_timeout $timeout` "$text"; then
         xx_fatal "Prohibited text '$text' spotted on $machine."
-    fi    
+    fi
 }
 
 xx_sleep() {
     local amount=`xx_get_def_var "$@"`
-    
+
     xx_echo "Waiting for ${amount}s."
     sleep $amount
 }
@@ -335,7 +335,7 @@ xx_sleep() {
 
 xx_cls() {
     local machine=`xx_get_var machine $XX_LAST_MACHINE "$@"`
-    
+
     xx_echo "Clearing the screen on $machine."
     for i in `seq 1 35`; do
         xx_do_qemu_command "$machine" "sendkey ret"
@@ -353,7 +353,7 @@ xx_do_ocr_prepare() {
 }
 
 xx_do_ocr() {
-    local column_count="$(( `identify -format '%w' $1` / 8 ))"  
+    local column_count="$(( `identify -format '%w' $1` / 8 ))"
     local row_count="$(( `identify -format '%h' $1` / 16 ))"
     # What we do in this magick pipeline:
     # - convert the image to text, i.e. each pixel's color is converted to 0 or F (black/white)
@@ -385,7 +385,7 @@ xx_do_screenshot() {
             fi
             sleep 1
         done
-        
+
         if [ -n "$4" ]; then
             xx_do_ocr "$3" >"$4"
             if $XX_DUMP_TERMINAL; then
@@ -397,7 +397,7 @@ xx_do_screenshot() {
                 else
                     print_it=true
                 fi
-                
+
                 if $print_it; then
                     xx_debug "Terminal content:"
                     sed 's#.*# | &#' <"$4" | xx_debug_filter
@@ -424,33 +424,33 @@ xx_do_screenshot() {
 xx_do_complex_text_waiting() {
     xx_debug "waiting: $1/$2 match='$4', no-match='$3'"
     xx_debug "waiting: $1/$2 prompt_is_success=$5  check_for_bdsh_error=$6"
-    
+
     while true; do
         xx_activity "Taking screenshot, checking for specific output."
-        
+
         xx_do_screenshot "$1" "$XX_TEMP/$1-full.ppm" \
             "$XX_TEMP/$1-term.png" "$XX_TEMP/$1-term.txt"
-        
+
         if [ -n "$3" ] && grep -q "$3" <"$XX_TEMP/$1-term.txt"; then
             return 3
         fi
-        
+
         if [ -n "$4" ] && grep -q "$4" <"$XX_TEMP/$1-term.txt" ; then
             return 0
         fi
-        
+
         if $6 && grep -q -e 'Cannot spawn' -e 'Command failed' <"$XX_TEMP/$1-term.txt"; then
             return 4
         fi
-        
+
         if $5 && grep -q '^/[-a-zA-Z0-9_/.]* # _[ ]*$' <"$XX_TEMP/$1-term.txt" ; then
             return 0
         fi
-        
+
         if [ `date +%s` -gt $2 ]; then
             return 2
         fi
-        
+
         sleep 1
     done
 }
@@ -463,18 +463,18 @@ xx_cmd() {
     local text=`xx_get_var assert "" "$@"`
     local negtext=`xx_get_var die_on "" "$@"`
     local text_is_empty=`if [ -n "$text" ]; then echo false; else echo true; fi`
-    
+
     xx_echo "Sending '$cmd' to $machine."
     xx_do_type "$machine" "$cmd"
     xx_do_qemu_command "$machine" "sendkey ret"
-    
-    
+
+
     xx_do_complex_text_waiting "$machine" `xx_do_compute_timeout $timeout` \
         "$negtext" "$text" $text_is_empty true
     local res=$?
-    
+
     xx_debug "xx_do_complex_text_waiting = $res"
-    
+
     case $res in
         0|1)
             return 0
@@ -638,7 +638,7 @@ if $XX_TRAIN_OCR; then
         echo
         exit
     fi
-    
+
     # Set to false to debug the script below without running QEMU
     # all the time
     if true; then
@@ -653,7 +653,7 @@ if $XX_TRAIN_OCR; then
         xx_do_screenshot ocr "$XX_TEMP/ocr-full.ppm" "$XX_TEMP/ocr-term.png"
         xx_stop_machine
     fi
-    
+
     xx_echo "Doing OCR..."
     xx_do_ocr_prepare "$XX_TEMP/ocr-term.png" \
         | (
@@ -672,7 +672,7 @@ if $XX_TRAIN_OCR; then
                 alphabet_size=`echo "$alphabet" | wc -c`
                 for i in `seq 1 $(( $alphabet_size - 1))`; do
                     symbol="`echo \"$alphabet\" | fold -w 1 | sed -n \"${i}p\" | sed 's#[*\.\&\\:\/\[]\|\]#\\\\&#g'`"
-                    echo "s:$current_line:$symbol:" 
+                    echo "s:$current_line:$symbol:"
                     read current_line
                 done
                 echo "$current_line" | tr 'F' '0' | sed 's#.*#s:&:_:#'
@@ -692,7 +692,7 @@ if $XX_TRAIN_OCR; then
     xx_echo "New OCR scheme is in $XX_TRAIN_OCR_FILE."
     exit
 fi
-    
+
 
 XX_RESULT_SUMMARY="$XX_TEMP/summary.$$.txt"
 

@@ -44,7 +44,7 @@ class GetTestListTask(Task):
     def get_scenario_list(self, root, base):
         if base == 'dummy/':
             return []
-        
+
         tests = []
         for name in os.listdir(root):
             path = os.path.join(root, name)
@@ -56,22 +56,22 @@ class GetTestListTask(Task):
                 xxx, ext = os.path.splitext(path)
                 if ext == '.yml':
                     tests.append(base + name)
-        
+
         return tests
 
     def run(self):
         files = self.get_scenario_list(self.root_path, '')
-        
+
         if 'ALL' in self.test_filter:
             self.test_filter = files
-        
+
         files_filtered = []
         for fn in files:
             for pat in self.test_filter:
                 if fnmatch.fnmatch(fn, pat):
                     files_filtered.append(fn)
                     break
-        
+
         self.ctl.dprint('scenarios files: %s', files_filtered)
         return {
             'scenarios' : files_filtered,
@@ -87,22 +87,22 @@ class ScheduleTestsTask(Task):
         self.base_path = base_path
         self.extra_tester_options = extra_tester_options
         Task.__init__(self, None)
-    
+
     def run(self):
         helenos_build_tasks = self.ctl.get_dependency_data('helenos_tasks')
         scenarios = self.ctl.get_dependency_data('scenarios')
         scenario_base_path = self.ctl.get_dependency_data('scenario_dir')
         harbour_tasks = self.ctl.get_dependency_data('harbour_tasks')
-        
+
         self.extra_builds.set_dependent_tasks(helenos_build_tasks, harbour_tasks)
-        
+
         profiles_all = helenos_build_tasks.keys()
         profiles = []
         for p in self.testable_profiles:
             if p in profiles_all:
                 profiles.append(p)
-        
-        
+
+
         for scenario in scenarios:
             for profile in profiles:
                 scenario_filename = os.path.join(scenario_base_path, scenario)
@@ -129,7 +129,7 @@ class ScheduleTestsTask(Task):
                 )
 
         return True
-    
+
     def get_needed_harbours(self, scenario_filename):
         with open(scenario_filename) as f:
             try:
