@@ -139,7 +139,7 @@ logger = logging.getLogger('main')
 
 with open(config.scenario, 'r') as f:
     try:
-        scenario = yaml.load(f)
+        scenario = yaml.safe_load(f)
     except yaml.YAMLError as ex:
         logger.error(ex)
         sys.exit(1)
