@@ -28,16 +28,4 @@
 # THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #
 
-if ! python --version 2>&1 | grep -q '^Python 3[.]'; then
-    echo "Python version mismatch, Python 3.x needed."
-    exit 1
-fi
-
-NOSE=`which nosetests 2>/dev/null`
-
-if [ -z "$NOSE" ]; then
-    echo "nose framework not found, aborting."
-    exit 1
-fi
-
-exec $NOSE -v -d tests/test_*.py
+exec python3 -m pytest -v --log-level debug "$@" tests/

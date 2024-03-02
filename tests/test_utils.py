@@ -28,28 +28,19 @@
 # THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #
 
-from nose.tools import eq_
+import pytest
 
-def check_format_command(expected, input):
-    from htest.utils import format_command
-    eq_(format_command(input), expected)
+import htest.utils
 
-def test_format_command():
-    test_cases = [
-        ( 'echo Hello', [ 'echo', 'Hello' ]),
-        ( "echo 'Quote\"'", [ 'echo', 'Quote"' ]),
-    ]
-    for expected, input in test_cases:
-        yield check_format_command, expected, input
+@pytest.mark.parametrize("expected, input", [
+    ( 'echo Hello', [ 'echo', 'Hello' ]),
+    ( "echo 'Quote\"'", [ 'echo', 'Quote"' ]),
+])
+def test_format_command(expected, input):
+    assert htest.utils.format_command(input) == expected
 
-
-def check_format_command_pipe(expected, input):
-    from htest.utils import format_command_pipe
-    eq_(format_command_pipe(input), expected)
-
-def test_format_command_pipe():
-    test_cases = [
-        ( 'echo Hello | grep ll', [ [ 'echo', 'Hello' ], [ 'grep', 'll' ] ]),
-    ]
-    for expected, input in test_cases:
-        yield check_format_command_pipe, expected, input
+@pytest.mark.parametrize("expected, input", [
+    ( 'echo Hello | grep ll', [ [ 'echo', 'Hello' ], [ 'grep', 'll' ] ]),
+])
+def test_format_command_pipe(expected, input):
+    assert htest.utils.format_command_pipe(input) == expected

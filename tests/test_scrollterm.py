@@ -28,8 +28,9 @@
 # THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #
 
-from nose.tools import eq_
-from htest.scrollterm import ScrollingTerminal
+import pytest
+
+import htest.scrollterm
 
 class TermCaptureGallery:
     def __init__(self, captures):
@@ -42,7 +43,7 @@ class TermCaptureGallery:
 
 def make_terminal(captures):
     gallery = TermCaptureGallery(captures)
-    return ScrollingTerminal(gallery.capture, "_")
+    return htest.scrollterm.ScrollingTerminal(gallery.capture, "_")
 
 
 
@@ -51,26 +52,20 @@ def test_capture():
         "a\nb\nc\nd",
         "b\nc\nd\ne",
     ])
-    eq_(term.capture(), [ "a", "b", "c", "d" ])
-    eq_(term.capture(), [ "b", "c", "d", "e" ])
+    assert term.capture() == [ "a", "b", "c", "d" ]
+    assert term.capture() == [ "b", "c", "d", "e" ]
 
-
+@pytest.mark.parametrize("expected, prev, curr", [
+    ( ( True, False ), ["a", "b"], ["a", "b"] ),
+    ( ( False, False ), ["a", "b"], ["a", "bb"] ),
+    ( ( True, True), ["a", "b_"], ["a", "bb"] ),
+    ( ( True, True), ["a", "bb_"], ["a", "bb"] ),
+    ( ( True, True), ["a", "bb_"], ["a", "bbbbb"] ),
+])
 def check_intr_same_lines(expected, prev, curr):
     term = make_terminal([])
     msg = "_same_lines({}, {}) == {}".format(prev, curr, expected)
     assert term._same_lines(prev, curr) == expected, msg
-
-def test_intr_same_lines():
-    test_cases = [
-        ( ( True, False ), ["a", "b"], ["a", "b"] ),
-        ( ( False, False ), ["a", "b"], ["a", "bb"] ),
-        ( ( True, True), ["a", "b_"], ["a", "bb"] ),
-        ( ( True, True), ["a", "bb_"], ["a", "bb"] ),
-        ( ( True, True), ["a", "bb_"], ["a", "bbbbb"] ),
-    ]
-    for expected, prev, curr in test_cases:
-        yield check_intr_same_lines, expected, prev, curr
-
 
 def test_get_lines_once_simple():
     term = make_terminal([
@@ -79,10 +74,10 @@ def test_get_lines_once_simple():
         "b\nc\nd\ne",
         "d\ne\nf\ng",
     ])
-    eq_(term.get_lines_once(), [ "a", "b", "c", "d" ])
-    eq_(term.get_lines_once(), [])
-    eq_(term.get_lines_once(), [ "e" ])
-    eq_(term.get_lines_once(), [ "f", "g" ])
+    assert term.get_lines_once() == [ "a", "b", "c", "d" ]
+    assert term.get_lines_once() == []
+    assert term.get_lines_once() == [ "e" ]
+    assert term.get_lines_once() == [ "f", "g" ]
 
 def test_get_lines_once_slow_line():
     term = make_terminal([
@@ -90,7 +85,7 @@ def test_get_lines_once_slow_line():
         "a\nbbb\n\n",
         "a\nbbb\nc\n",
     ])
-    eq_(term.get_lines_once(), [ "a", "b_" ])
-    eq_(term.get_lines_once(), [ "bbb" ])
-    eq_(term.get_lines_once(), [ "c" ])
+    assert term.get_lines_once() == [ "a", "b_" ]
+    assert term.get_lines_once() == [ "bbb" ]
+    assert term.get_lines_once() == [ "c" ]
 
