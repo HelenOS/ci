@@ -50,6 +50,10 @@ REQUIRED_TOOLS = [
     'msim',
     'meson',
     'ninja',
+    'Xvfb',
+    'xterm',
+    'xdotool',
+    'timeout',
 ]
 
 REQUIRED_PACKAGES = [
