@@ -1,6 +1,6 @@
 iniconfig==2.0.0
 packaging==23.2
-Pillow==10.1.0
+Pillow==10.2.0
 pluggy==1.4.0
 pytest==8.0.2
 PyYAML==6.0.1
